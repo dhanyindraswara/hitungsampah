@@ -7,21 +7,34 @@ import { formatTime } from '../lib/session';
 
 export default function Officer() {
   const { state, t, comparison, actions } = useApp();
-  const { trip } = state;
-  const complete = comparison.pct >= 100;
-  const grid = useMemo(() => qrGrid(trip.id), [trip.id]);
+  const picked = state.officerPick;
+
+  // The officer is either looking at the hiker who just scanned, or at someone
+  // they tapped in the queue. Queue entries have no scan behind them yet, so
+  // their card shows what the gate actually knows: they are still waiting.
+  const shown = picked
+    ? { id: picked.id, hiker: picked.name, mtn: state.trip.mtn, gate: state.trip.gate, group: picked.group }
+    : { ...state.trip, group: `${state.trip.group} ${t.people}` };
+
+  const complete = !picked && comparison.pct >= 100;
+  const grid = useMemo(() => qrGrid(shown.id), [shown.id]);
   const signedAt = useRef(null);
   if (state.verified && !signedAt.current) signedAt.current = formatTime();
 
   const details = [
-    { k: t.fHiker, v: trip.hiker },
-    { k: t.tripId, v: trip.id },
-    { k: t.fMountain, v: `${trip.mtn} · ${trip.gate}` },
-    { k: t.fGroup, v: `${trip.group} ${t.people}` },
-    { k: t.returned, v: `${comparison.pct}% (${comparison.matched}/${comparison.baseTotal})` },
+    { k: t.fHiker, v: shown.hiker },
+    { k: t.tripId, v: shown.id },
+    { k: t.fMountain, v: `${shown.mtn} · ${shown.gate}` },
+    { k: t.fGroup, v: shown.group },
+    {
+      k: t.returned,
+      v: picked ? '—' : `${comparison.pct}% (${comparison.matched}/${comparison.baseTotal})`,
+    },
   ];
 
-  const verdictLabel = state.manual ? t.passChipManual : complete ? t.labelPass : t.labelFail;
+  const verdictLabel = picked
+    ? t[picked.st]
+    : state.manual ? t.passChipManual : complete ? t.labelPass : t.labelFail;
 
   return (
     <>
@@ -54,7 +67,7 @@ export default function Officer() {
           }}
         >
           <div className="qr-card">
-            <div className="qr-grid" role="img" aria-label={`${t.tripId} ${trip.id}`}>
+            <div className="qr-grid" role="img" aria-label={`${t.tripId} ${shown.id}`}>
               {grid.map((row, r) => (
                 <div key={r} className="qr-grid__row">
                   {row.map((on, c) => (
@@ -68,7 +81,7 @@ export default function Officer() {
               ))}
             </div>
           </div>
-          <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, letterSpacing: '.02em' }}>{trip.id}</div>
+          <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, letterSpacing: '.02em' }}>{shown.id}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t.qrHint}</div>
         </div>
 
@@ -104,7 +117,7 @@ export default function Officer() {
           </div>
         </div>
 
-        {state.verified ? (
+        {state.verified && !picked ? (
           <div
             style={{
               marginTop: 14,
@@ -136,7 +149,7 @@ export default function Officer() {
                 {t.verified}
               </div>
               <div style={{ marginTop: 3, fontSize: 12.5, color: 'var(--text-mint-ink)' }}>
-                {t.signedBy} · Pos {trip.gate} · {signedAt.current}
+                {t.signedBy} · Pos {state.trip.gate} · {signedAt.current}
               </div>
             </div>
           </div>
@@ -145,9 +158,19 @@ export default function Officer() {
         <div style={{ marginTop: 22, fontSize: 15.5, fontWeight: 700 }}>{t.queue}</div>
         <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {gateQueue.map((entry) => (
-            <div key={entry.id} className="queue-row">
+            <button
+              key={entry.id}
+              type="button"
+              className="queue-row queue-row--action"
+              aria-pressed={picked?.id === entry.id}
+              style={{
+                borderColor: picked?.id === entry.id ? 'var(--brand)' : 'var(--line)',
+                background: picked?.id === entry.id ? 'var(--surface-mint-soft)' : '#fff',
+              }}
+              onClick={() => actions.pickHiker(picked?.id === entry.id ? null : entry)}
+            >
               <div className="queue-row__avatar">{entry.ini}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>{entry.name}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 1 }}>
                   {entry.id} · {entry.group}
@@ -172,24 +195,30 @@ export default function Officer() {
               >
                 {t[entry.st]}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </div>
 
       <div className="dock">
         <div className="dock__inner">
-          <button
-            type="button"
-            className="btn btn-verify"
-            style={{
-              background: state.verified ? '#FFFFFF' : 'var(--brand)',
-              color: state.verified ? 'var(--brand)' : '#FFFFFF',
-            }}
-            onClick={state.verified ? actions.finishTrip : actions.verify}
-          >
-            {state.verified ? t.done : t.verify}
-          </button>
+          {picked ? (
+            <button type="button" className="btn btn-secondary" onClick={() => actions.pickHiker(null)}>
+              {t.backToHiker}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-verify"
+              style={{
+                background: state.verified ? '#FFFFFF' : 'var(--brand)',
+                color: state.verified ? 'var(--brand)' : '#FFFFFF',
+              }}
+              onClick={state.verified ? actions.finishTrip : actions.verify}
+            >
+              {state.verified ? t.done : t.verify}
+            </button>
+          )}
         </div>
       </div>
     </>

@@ -39,25 +39,58 @@ src/
 design/        prototipe asli dari Claude Design, sebagai acuan visual
 ```
 
-**Alur.** splash → beranda → pendakian baru → kamera sebelum naik → proses →
-review → simpan baseline → *(mendaki)* → kamera setelah turun → proses → review →
-perbandingan → lengkap atau foto ulang → verifikasi petugas (QR) → selesai.
-Riwayat dan Pengaturan ada di tab bar.
+**Alur.** splash → beranda → pendakian baru → kamera sebelum naik → hitung →
+simpan baseline → *(mendaki)* → kamera setelah turun → hitung → perbandingan →
+lengkap atau foto ulang → verifikasi petugas (QR) → selesai. Riwayat dan
+Pengaturan ada di tab bar.
 
-**Deteksi** ada di balik satu interface, `src/lib/detector.js`:
+**Kamera asli.** Layar kamera memakai `getUserMedia` (kamera belakang), menyimpan
+foto sebagai JPEG di perangkat, punya garis bantu dan senter (kalau kameranya
+mendukung), dan bisa menghapus foto terakhir. Kalau izin ditolak atau browser
+tidak memberi kamera, layarnya menjelaskan kenapa dan menyediakan tombol coba
+lagi. `getUserMedia` butuh **https:// atau localhost** — di http biasa browser
+tidak akan memberikan kamera sama sekali.
+
+**Hitungnya manual, dan itu disengaja.** Aplikasi tidak menebak. Pendaki
+menambahkan tiap bungkus lewat katalog, jumlahnya bisa dinaik-turunkan, dan
+aplikasi yang mengerjakan bagian yang memang mesin lebih jago: membandingkan
+sebelum vs sesudah, per produk, lalu menghitung persentase kembali.
+
+**Mode demo.** Pengaturan → Mode demo mengganti detector ke skenario dari desain
+(overlay kotak deteksi, 39 bungkus, 85% lalu 100% setelah foto ulang). Berguna
+untuk presentasi tanpa perlu menata sampah sungguhan.
+
+### Menyambungkan model AI nanti
+
+Semua deteksi lewat satu interface di `src/lib/detector.js`:
 
 ```js
-detector.scene(mode, attempt)   // bounding box untuk overlay langsung
-detector.detect(mode, attempt)  // hasil hitung yang sudah digabung & dedup
+{
+  id: 'model',
+  autoCounts: true,
+  overlay: (mode) => [],              // kotak untuk overlay kamera, boleh kosong
+  async detect({ mode, attempt, frames }) {
+    // frames = JPEG hasil jepretan: { id, blob, url, w, h }
+    return [{ id: 'indomie', qty: 4, cf: 97 }];   // cf = keyakinan 0–100
+  },
+}
 ```
 
-Implementasi saat ini masih **scripted** — mengulang skenario dari desain supaya
-seluruh alur bisa dicoba tanpa model. Untuk memakai inferensi asli (ONNX Runtime
-Web / TFLite / MediaPipe di dalam worker), cukup buat objek lain dengan dua
-method itu lalu ekspor sebagai `detector`. Tidak ada komponen layar yang berubah.
+Tambahkan objek itu ke `DETECTORS`, tawarkan di Pengaturan, selesai — tidak ada
+komponen layar yang perlu diubah. Hasil di bawah `LOW_CONFIDENCE` (70) otomatis
+tampil sebagai "perlu dicek", dan pendaki tetap bisa mengoreksi tiap angka
+sebelum disimpan. Rekomendasi: jalankan modelnya di dalam Web Worker
+(ONNX Runtime Web / TFLite / MediaPipe) supaya UI tidak tersendat.
 
-**Penyimpanan** lokal via IndexedDB (`src/lib/storage.js`). Kalau IndexedDB
-diblokir (mode penyamaran), aplikasi tetap jalan dengan nilai default.
+Catatan jujur: model umum (COCO dan sejenisnya) cuma kenal kategori seperti
+botol dan gelas, bukan merek. Untuk mengenali Indomie atau Kopiko perlu dataset
+dan model latihan sendiri.
+
+**Penyimpanan** lokal via IndexedDB (`src/lib/storage.js`): riwayat pendakian,
+pengaturan, dan foto sebelum/sesudah. Tidak ada akun, tidak ada server, foto
+tidak pernah diunggah. Pengaturan → Data offline menunjukkan pemakaian ruang dan
+bisa menghapus semuanya. Pengaturan → Ekspor mengunduh CSV (baris per pendakian
+dan per bungkus) langsung dari perangkat.
 
 **Offline.** `public/sw.js` menyimpan app shell — network-first untuk navigasi,
 stale-while-revalidate untuk aset build dan font.
@@ -70,14 +103,12 @@ prototipe di `design/`: design system dengan primary digeser ke forest green
 di-host sendiri dari `public/fonts/`. Lebar konten 430px, target sentuh minimal
 36–44px, semua animasi di bawah 250ms.
 
-Yang sengaja masih visual saja (sesuai prototipe):
+Yang masih visual saja:
 
 - **Toggle mode gelap** menyala dan tersimpan, tapi belum mengubah tema — palet
   gelap memang belum didesain.
-- **Ikon flash dan grid** di kamera hanya hiasan.
-- **Baris pengaturan** (data offline, ekspor, tentang, privasi) belum punya
-  halaman tujuan. Baris data offline sudah menampilkan jumlah trip asli.
-- **Kamera masih simulasi**, belum `getUserMedia` — sepasang dengan detector scripted.
-- **Koordinat GPS** di layar review masih placeholder (`src/lib/session.js`);
+- **Koordinat GPS** di layar hitung masih placeholder (`src/lib/session.js`);
   jamnya asli.
-- **Blok QR** adalah pola deterministik dari ID trip, belum kode yang bisa discan.
+- **Blok QR** adalah pola deterministik dari ID pendakian, belum kode yang bisa
+  discan. Tinggal ganti dengan encoder QR saat aplikasi petugas benar-benar
+  memindainya.

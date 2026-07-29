@@ -1,24 +1,49 @@
 /**
- * Packaging detector.
+ * Packaging detector — the single seam between the app and any counting logic.
  *
- * The app talks to detection only through this interface:
+ * A detector is an object with this shape:
  *
- *   detector.scene(mode, attempt)   -> Box[]         objects laid out in frame
- *   detector.detect(mode, attempt)  -> Detection[]   merged, de-duplicated counts
+ *   id              string   stable identifier, persisted in settings
+ *   autoCounts      boolean  true if it produces counts on its own
+ *   overlay(mode)   Box[]    boxes to draw over the viewfinder ([] if none)
+ *   detect(input)   Promise<Detection[]>
  *
- *   Box       { id, x, y, w, h, r, lab }   x/y/w/h are % of the viewfinder
- *   Detection { id, qty, cf }              cf = confidence 0–100
+ *   input      { mode: 'before'|'after', attempt: number, frames: Frame[] }
+ *   Frame      { id, blob, url, w, h }     captured JPEG stills
+ *   Box        { id, x, y, w, h, r, lab }  x/y/w/h are % of the viewfinder
+ *   Detection  { id, qty, cf }             cf = confidence 0–100
  *
- * The implementation below is scripted: it replays the scenes from the design
- * so the flow is demonstrable end to end without a model. Swapping in real
- * inference (TFLite / ONNX Runtime Web / MediaPipe in a worker) means writing
- * another object with these two methods and exporting it from here — no screen
- * component needs to change.
+ * Two implementations ship today:
+ *
+ *   manualDetector    real camera, no automatic counting — the hiker builds the
+ *                     list on the review screen. This is the default.
+ *   scriptedDetector  replays the scenes from the design, for demos and pitches.
+ *                     Enabled by the "Mode demo" switch in Settings.
+ *
+ * ── Adding real AI later ────────────────────────────────────────────────────
+ * Write a third object with the same four members:
+ *
+ *   export const modelDetector = {
+ *     id: 'model',
+ *     autoCounts: true,
+ *     overlay: () => [],                        // or live boxes from the model
+ *     async detect({ frames }) {
+ *       const raw = await runModel(frames);     // ONNX Runtime Web / TFLite /
+ *       return mergeAcrossFrames(raw);          // MediaPipe, ideally in a worker
+ *     },
+ *   };
+ *
+ * then add it to DETECTORS below and offer it in Settings. `detect` receives the
+ * actual captured JPEG frames and returns one `{ id, qty, cf }` per product;
+ * anything under LOW_CONFIDENCE already renders as "needs a check" on the review
+ * screen, and the hiker can still correct every number. No screen component has
+ * to change.
  */
 
-// Objects visible in the before-hike frame. `lab` marks the five spatially
-// separated boxes that carry a name tag; the rest get a bare box so labels
-// never stack or collide (Google Lens behaviour).
+// ── Scripted demo data ──────────────────────────────────────────────────────
+
+// Objects visible in the before-hike frame. `lab` marks the boxes that carry a
+// name tag; the rest get a bare box so labels never stack or collide.
 const sceneBefore = [
   { id: 'indomie', x: 5, y: 9, w: 25, h: 13, r: 7 },
   { id: 'indomie', x: 32, y: 6, w: 25, h: 13, r: 7 },
@@ -72,11 +97,24 @@ const afterRetake = [
   { id: 'unk3', qty: 1, cf: 55 },
 ];
 
-export const scriptedDetector = {
-  scene(mode) {
-    return mode === 'before' ? sceneBefore : sceneAfter;
+// ── Implementations ─────────────────────────────────────────────────────────
+
+/** Real camera, human counting. No model, no guessing. */
+export const manualDetector = {
+  id: 'manual',
+  autoCounts: false,
+  overlay: () => [],
+  async detect() {
+    return [];
   },
-  detect(mode, attempt = 1) {
+};
+
+/** Demo playback of the design's scenes. */
+export const scriptedDetector = {
+  id: 'demo',
+  autoCounts: true,
+  overlay: (mode) => (mode === 'before' ? sceneBefore : sceneAfter),
+  async detect({ mode, attempt = 1 }) {
     const source = mode === 'before'
       ? baselineDetections
       : (attempt === 1 ? afterFirstAttempt : afterRetake);
@@ -84,9 +122,16 @@ export const scriptedDetector = {
   },
 };
 
-export const detector = scriptedDetector;
+const DETECTORS = {
+  [manualDetector.id]: manualDetector,
+  [scriptedDetector.id]: scriptedDetector,
+};
 
-/** Milliseconds between two boxes appearing on the live overlay. */
+export function getDetector(id) {
+  return DETECTORS[id] || manualDetector;
+}
+
+/** Milliseconds between two boxes appearing on the demo overlay. */
 export const SCAN_SPEED_MS = 380;
 
 /** Milliseconds each of the three processing phases takes. */
@@ -97,3 +142,6 @@ export const SPLASH_MS = 1700;
 
 /** Confidence below this reads as "needs a check" in the review list. */
 export const LOW_CONFIDENCE = 70;
+
+/** Longest edge of a captured still, in pixels. */
+export const CAPTURE_MAX_EDGE = 1280;

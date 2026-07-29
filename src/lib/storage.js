@@ -57,8 +57,36 @@ export async function writeValue(key, value) {
   }
 }
 
+export async function deleteValue(key) {
+  try {
+    await withStore('readwrite', (store) => store.delete(key));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function listKeys() {
+  try {
+    return (await withStore('readonly', (store) => store.getAllKeys())) || [];
+  } catch {
+    return [];
+  }
+}
+
+/** Bytes this origin is using, when the browser is willing to say. */
+export async function estimateUsage() {
+  try {
+    const { usage } = await navigator.storage.estimate();
+    return usage ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const KEYS = {
   trips: 'trips',
   settings: 'settings',
   activeTrip: 'activeTrip',
+  photoPrefix: 'photos:',
 };

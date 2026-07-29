@@ -1112,3 +1112,58 @@
   line-height: 1.3;
   color: var(--text-muted);
 }
+
+/* ---------- Camera guides ---------- */
+
+.camera__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.camera__grid span {
+  position: absolute;
+  background: rgba(255, 255, 255, .28);
+}
+
+.camera__grid span[style*="left"] {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.camera__grid span[style*="top"] {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.camera__tool:disabled {
+  cursor: not-allowed;
+}
+
+/* ---------- Actionable list rows ---------- */
+
+.settings-row--action {
+  width: 100%;
+  background: none;
+  font: inherit;
+  transition: background var(--dur-hover);
+}
+
+.settings-row--action:hover:not(:disabled) {
+  background: #F6F9F6;
+}
+
+.settings-row--action:disabled {
+  cursor: not-allowed;
+}
+
+.queue-row--action {
+  width: 100%;
+  transition: border-color var(--dur-hover), background var(--dur-hover);
+}
+
+.trip-card:disabled {
+  cursor: default;
+}
