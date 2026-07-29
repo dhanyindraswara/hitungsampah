@@ -1,0 +1,99 @@
+/**
+ * Packaging detector.
+ *
+ * The app talks to detection only through this interface:
+ *
+ *   detector.scene(mode, attempt)   -> Box[]         objects laid out in frame
+ *   detector.detect(mode, attempt)  -> Detection[]   merged, de-duplicated counts
+ *
+ *   Box       { id, x, y, w, h, r, lab }   x/y/w/h are % of the viewfinder
+ *   Detection { id, qty, cf }              cf = confidence 0–100
+ *
+ * The implementation below is scripted: it replays the scenes from the design
+ * so the flow is demonstrable end to end without a model. Swapping in real
+ * inference (TFLite / ONNX Runtime Web / MediaPipe in a worker) means writing
+ * another object with these two methods and exporting it from here — no screen
+ * component needs to change.
+ */
+
+// Objects visible in the before-hike frame. `lab` marks the five spatially
+// separated boxes that carry a name tag; the rest get a bare box so labels
+// never stack or collide (Google Lens behaviour).
+const sceneBefore = [
+  { id: 'indomie', x: 5, y: 9, w: 25, h: 13, r: 7 },
+  { id: 'indomie', x: 32, y: 6, w: 25, h: 13, r: 7 },
+  { id: 'aqua', x: 61, y: 5, w: 12, h: 29, r: 22 },
+  { id: 'aqua', x: 77, y: 8, w: 12, h: 29, r: 22 },
+  { id: 'teh', x: 5, y: 27, w: 13, h: 25, r: 18 },
+  { id: 'kopiko', x: 22, y: 25, w: 17, h: 10, r: 5, lab: 1 },
+  { id: 'goodday', x: 43, y: 24, w: 14, h: 17, r: 6 },
+  { id: 'lemin', x: 62, y: 41, w: 12, h: 26, r: 20, lab: 1 },
+  { id: 'sq', x: 5, y: 58, w: 26, h: 12, r: 5, lab: 1 },
+  { id: 'unk1', x: 35, y: 46, w: 21, h: 14, r: 9 },
+  { id: 'unk2', x: 34, y: 68, w: 25, h: 19, r: 11, lab: 1 },
+  { id: 'teh', x: 78, y: 44, w: 13, h: 25, r: 18 },
+];
+
+// After-hike frame. The top-left object is deliberately unlabelled — it shares
+// that corner with the live-count pill, and its box is large enough to read bare.
+const sceneAfter = [
+  { id: 'unk2', x: 6, y: 9, w: 30, h: 22, r: 12 },
+  { id: 'indomie', x: 40, y: 7, w: 24, h: 12, r: 7 },
+  { id: 'aqua', x: 68, y: 5, w: 12, h: 27, r: 22 },
+  { id: 'teh', x: 84, y: 9, w: 12, h: 25, r: 18 },
+  { id: 'kopiko', x: 8, y: 38, w: 18, h: 11, r: 5, lab: 1 },
+  { id: 'goodday', x: 30, y: 34, w: 14, h: 16, r: 6 },
+  { id: 'unk1', x: 50, y: 35, w: 20, h: 14, r: 9, lab: 1 },
+  { id: 'lemin', x: 74, y: 41, w: 12, h: 24, r: 20 },
+  { id: 'sq', x: 8, y: 57, w: 24, h: 12, r: 5, lab: 1 },
+  { id: 'unk3', x: 40, y: 58, w: 12, h: 26, r: 20, lab: 1 },
+  { id: 'unk1', x: 58, y: 63, w: 20, h: 15, r: 9 },
+];
+
+const baselineDetections = [
+  { id: 'indomie', qty: 4, cf: 97 }, { id: 'aqua', qty: 2, cf: 95 }, { id: 'teh', qty: 3, cf: 92 },
+  { id: 'kopiko', qty: 15, cf: 88 }, { id: 'goodday', qty: 2, cf: 90 }, { id: 'lemin', qty: 1, cf: 93 },
+  { id: 'sq', qty: 2, cf: 86 }, { id: 'unk1', qty: 6, cf: 61 }, { id: 'unk2', qty: 4, cf: 58 },
+];
+
+// First after-hike pass: a few wrappers stayed out of frame, so the trip fails.
+const afterFirstAttempt = [
+  { id: 'indomie', qty: 4, cf: 96 }, { id: 'aqua', qty: 2, cf: 94 }, { id: 'teh', qty: 3, cf: 91 },
+  { id: 'kopiko', qty: 11, cf: 74 }, { id: 'goodday', qty: 2, cf: 89 }, { id: 'lemin', qty: 1, cf: 92 },
+  { id: 'sq', qty: 2, cf: 84 }, { id: 'unk1', qty: 4, cf: 57 }, { id: 'unk2', qty: 4, cf: 60 },
+  { id: 'unk3', qty: 1, cf: 54 },
+];
+
+// Retake: everything is found, plus one item that was not in the baseline.
+const afterRetake = [
+  { id: 'indomie', qty: 4, cf: 96 }, { id: 'aqua', qty: 2, cf: 95 }, { id: 'teh', qty: 3, cf: 93 },
+  { id: 'kopiko', qty: 15, cf: 82 }, { id: 'goodday', qty: 2, cf: 90 }, { id: 'lemin', qty: 1, cf: 93 },
+  { id: 'sq', qty: 2, cf: 87 }, { id: 'unk1', qty: 6, cf: 64 }, { id: 'unk2', qty: 4, cf: 62 },
+  { id: 'unk3', qty: 1, cf: 55 },
+];
+
+export const scriptedDetector = {
+  scene(mode) {
+    return mode === 'before' ? sceneBefore : sceneAfter;
+  },
+  detect(mode, attempt = 1) {
+    const source = mode === 'before'
+      ? baselineDetections
+      : (attempt === 1 ? afterFirstAttempt : afterRetake);
+    return source.map((d) => ({ ...d }));
+  },
+};
+
+export const detector = scriptedDetector;
+
+/** Milliseconds between two boxes appearing on the live overlay. */
+export const SCAN_SPEED_MS = 380;
+
+/** Milliseconds each of the three processing phases takes. */
+export const PROCESS_PHASE_MS = 780;
+
+/** How long the splash screen holds before the app is ready. */
+export const SPLASH_MS = 1700;
+
+/** Confidence below this reads as "needs a check" in the review list. */
+export const LOW_CONFIDENCE = 70;

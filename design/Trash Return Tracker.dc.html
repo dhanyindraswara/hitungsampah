@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face{font-family:'Plus Jakarta Sans';src:url('fonts/PlusJakartaSans-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'Plus Jakarta Sans';src:url('fonts/PlusJakartaSans-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:'Plus Jakarta Sans';src:url('fonts/PlusJakartaSans-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'Plus Jakarta Sans';src:url('fonts/PlusJakartaSans-ExtraBold.ttf') format('truetype');font-weight:800;font-display:swap}
+html,body{margin:0;padding:0;background:#E9EDE9;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;font-weight:500;color:#1F1F1F;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#14563C;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+button{font-family:inherit;font-weight:600;cursor:pointer;border:0;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-weight:500;color:#1F1F1F}
+input:focus,textarea:focus{outline:2px solid rgba(20,86,60,.35);outline-offset:1px}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes boxin{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:none}}
+@keyframes sweep{0%{transform:translateY(-100%)}100%{transform:translateY(700%)}}
+@keyframes breathe{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.8;transform:scale(1.06)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#E9EDE9">
+<div style="width:430px;max-width:100%;min-height:100vh;position:relative;overflow:hidden;background:#F8F9F7;box-shadow:0 20px 48px rgba(15,23,42,.10)">
+
+<div style="position:absolute;top:-160px;left:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(47,163,107,.30) 0%,rgba(47,163,107,0) 70%);filter:blur(28px);animation:breathe 12s ease-in-out infinite;pointer-events:none"></div>
+<div style="position:absolute;top:180px;right:-160px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(151,209,198,.42) 0%,rgba(151,209,198,0) 70%);filter:blur(30px);pointer-events:none"></div>
+
+<sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px">
+  <div style="width:84px;height:84px;border-radius:26px;background:linear-gradient(150deg,#1B6B47 0%,#14563C 100%);box-shadow:0 18px 48px rgba(20,86,60,.34);display:grid;place-items:center;animation:pop .5s cubic-bezier(.22,1,.36,1) both">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 19 6.2-10.6L12.4 14l2.3-3.7L21.5 19H2.5Z"></path><path d="m8.7 8.4 1.7-2.9"></path></svg>
+  </div>
+  <div style="text-align:center;animation:fu .6s cubic-bezier(.22,1,.36,1) .1s both">
+    <div style="font-size:26px;font-weight:800;letter-spacing:-.02em">Trash Return Tracker</div>
+    <div style="margin-top:8px;font-size:16px;color:#4A4A4A">{{ t.tagline }}</div>
+  </div>
+  <div style="position:absolute;bottom:56px;display:flex;align-items:center;gap:9px;font-size:13px;color:#7A7A7A">
+    <div style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(20,86,60,.2);border-top-color:#14563C;animation:spin .8s linear infinite"></div>
+    {{ t.loading }}
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:54px 20px 112px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:44px;height:44px;border-radius:15px;background:linear-gradient(150deg,#1B6B47 0%,#14563C 100%);box-shadow:0 10px 24px rgba(20,86,60,.28);display:grid;place-items:center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 19 6.2-10.6L12.4 14l2.3-3.7L21.5 19H2.5Z"></path></svg>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;line-height:1.15">Trash Return Tracker</div>
+        <div style="font-size:12.5px;color:#7A7A7A;margin-top:1px">{{ t.tagline }}</div>
+      </div>
+    </div>
+    <button onClick="{{ nav }}" data-s="officer" aria-label="Officer mode" style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid #E6E8EC;display:grid;place-items:center;box-shadow:0 2px 8px rgba(15,23,42,.06)">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+    </button>
+  </div>
+
+  <p style="margin:22px 2px 0;font-size:27px;font-weight:800;letter-spacing:-.025em;line-height:1.18;text-wrap:balance">{{ t.homeHead }}</p>
+  <p style="margin:8px 2px 0;font-size:15px;line-height:1.55;color:#4A4A4A;text-wrap:pretty">{{ t.homeSub }}</p>
+
+  <sc-if value="{{ hasActive }}" hint-placeholder-val="{{ true }}">
+  <div style="margin-top:22px;padding:18px;border-radius:28px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 8px 24px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.7);animation:fu .35s cubic-bezier(.22,1,.36,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#14563C">{{ t.activeTrip }}</span>
+      <span style="font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:#D6FD91;color:#173D26">{{ t.stepAfterDue }}</span>
+    </div>
+    <div style="margin-top:10px;font-size:19px;font-weight:800;letter-spacing:-.01em">{{ trip.mtn }}</div>
+    <div style="margin-top:3px;font-size:13px;color:#7A7A7A">{{ trip.id }} · {{ trip.gate }}</div>
+    <div style="margin:16px 0 14px;display:flex;align-items:center;gap:8px">
+      <div style="flex:1;height:6px;border-radius:999px;background:linear-gradient(90deg,#2FA36B 0 50%,#E6E8EC 50% 100%)"></div>
+    </div>
+    <div style="display:flex;gap:18px;font-size:12.5px;color:#4A4A4A">
+      <span style="display:flex;align-items:center;gap:6px;font-weight:700;color:#14563C">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2FA36B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"></path></svg>{{ t.stepBefore }} · {{ baseTotal }} {{ t.itemsShort }}
+      </span>
+      <span style="display:flex;align-items:center;gap:6px">
+        <span style="width:13px;height:13px;border-radius:50%;border:2px solid #C9CFC9;display:inline-block"></span>{{ t.stepAfter }}
+      </span>
+    </div>
+    <button onClick="{{ scanAfter }}" style="margin-top:16px;width:100%;height:52px;border-radius:999px;background:#14563C;color:#fff;font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28);transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s" style-hover="transform:translateY(-1px);box-shadow:0 22px 54px rgba(20,86,60,.36)" style-active="transform:translateY(0);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>
+      {{ t.scanAfterCta }}
+    </button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ noActive }}" hint-placeholder-val="{{ true }}">
+  <button onClick="{{ nav }}" data-s="newtrip" style="margin-top:24px;width:100%;height:64px;border-radius:999px;background:#14563C;color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 18px 48px rgba(20,86,60,.28);transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s" style-hover="transform:translateY(-1px);box-shadow:0 22px 56px rgba(20,86,60,.36)" style-active="transform:translateY(0);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>
+    {{ t.start }}
+  </button>
+  </sc-if>
+
+  <div style="margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+    <div style="padding:14px 12px;border-radius:20px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+      <div style="font-size:24px;font-weight:800;letter-spacing:-.02em;color:#14563C">{{ stat.trips }}</div>
+      <div style="margin-top:2px;font-size:11.5px;line-height:1.3;color:#7A7A7A">{{ t.stTrips }}</div>
+    </div>
+    <div style="padding:14px 12px;border-radius:20px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+      <div style="font-size:24px;font-weight:800;letter-spacing:-.02em;color:#14563C">{{ stat.items }}</div>
+      <div style="margin-top:2px;font-size:11.5px;line-height:1.3;color:#7A7A7A">{{ t.stItems }}</div>
+    </div>
+    <div style="padding:14px 12px;border-radius:20px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+      <div style="font-size:24px;font-weight:800;letter-spacing:-.02em;color:#14563C">{{ stat.avg }}</div>
+      <div style="margin-top:2px;font-size:11.5px;line-height:1.3;color:#7A7A7A">{{ t.stAvg }}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px;display:flex;align-items:baseline;justify-content:space-between">
+    <div style="font-size:16px;font-weight:700">{{ t.recent }}</div>
+    <button onClick="{{ nav }}" data-s="history" style="font-size:13px;color:#14563C;display:flex;align-items:center;gap:5px">{{ t.seeAll }}
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+    </button>
+  </div>
+  <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ recent }}" as="tr" hint-placeholder-count="2">
+      <button onClick="{{ nav }}" data-s="history" style="width:100%;text-align:left;padding:14px 16px;border-radius:20px;background:#fff;border:1px solid #E6E8EC;box-shadow:0 2px 8px rgba(15,23,42,.06);display:flex;align-items:center;gap:14px;transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,23,42,.08)">
+        <div style="width:44px;height:44px;border-radius:14px;background:{{ tr.tint }};display:grid;place-items:center;flex:none">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ tr.ink }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 19 6.2-10.6L12.4 14l2.3-3.7L21.5 19H2.5Z"></path></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:700;letter-spacing:-.01em">{{ tr.mtn }}</div>
+          <div style="margin-top:2px;font-size:12.5px;color:#7A7A7A">{{ tr.date }} · {{ tr.items }} {{ t.itemsShort }}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:16px;font-weight:800;color:{{ tr.ink }}">{{ tr.pct }}%</div>
+          <div style="font-size:11px;color:#7A7A7A">{{ tr.label }}</div>
+        </div>
+      </button>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNewTrip }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:52px 20px 130px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ nav }}" data-s="home" aria-label="Back" style="width:40px;height:40px;margin-left:-8px;border-radius:14px;display:grid;place-items:center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+    </button>
+    <div style="font-size:18px;font-weight:800;letter-spacing:-.01em">{{ t.newTrip }}</div>
+  </div>
+  <div style="margin-top:16px;padding:14px 16px;border-radius:20px;background:#E7F3EC;border:1px solid #D2E8DB;display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#14563C">{{ t.tripId }}</div>
+      <div style="margin-top:3px;font-size:16px;font-weight:800;letter-spacing:-.01em">{{ trip.id }}</div>
+    </div>
+    <div style="font-size:12px;color:#4A6E5C;text-align:right;line-height:1.35">{{ t.autoGen }}</div>
+  </div>
+
+  <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
+    <label style="display:block">
+      <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fHiker }}</span>
+      <input name="hiker" value="{{ trip.hiker }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+    </label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label style="display:block">
+        <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fPhone }}</span>
+        <input name="phone" value="{{ trip.phone }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+      </label>
+      <label style="display:block">
+        <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fId }} <span style="color:#A0A6A0;font-weight:500">({{ t.optional }})</span></span>
+        <input name="nik" value="{{ trip.nik }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+      </label>
+    </div>
+    <label style="display:block">
+      <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fMountain }}</span>
+      <input name="mtn" value="{{ trip.mtn }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+    </label>
+    <label style="display:block">
+      <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fGate }}</span>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ gates }}" as="g" hint-placeholder-count="3">
+          <button onClick="{{ setGate }}" data-v="{{ g.name }}" style="height:42px;padding:0 16px;border-radius:999px;font-size:13.5px;font-weight:600;border:1px solid {{ g.bd }};background:{{ g.bg }};color:{{ g.fg }};transition:transform .18s cubic-bezier(.4,0,.2,1)" style-hover="transform:translateY(-1px)">{{ g.name }}</button>
+        </sc-for>
+      </div>
+    </label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <label style="display:block">
+        <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fClimb }}</span>
+        <input name="climb" value="{{ trip.climb }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+      </label>
+      <label style="display:block">
+        <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fReturn }}</span>
+        <input name="ret" value="{{ trip.ret }}" onChange="{{ onField }}" style="margin-top:6px;width:100%;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 16px;font-size:15.5px" />
+      </label>
+    </div>
+    <div>
+      <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fGroup }}</span>
+      <div style="margin-top:6px;height:52px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:0 8px 0 16px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:15.5px;font-weight:600">{{ trip.group }} {{ t.people }}</span>
+        <div style="display:flex;gap:6px">
+          <button onClick="{{ groupDec }}" aria-label="minus" style="width:38px;height:38px;border-radius:12px;background:#F1F4F1;display:grid;place-items:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+          </button>
+          <button onClick="{{ groupInc }}" aria-label="plus" style="width:38px;height:38px;border-radius:12px;background:#E7F3EC;display:grid;place-items:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <label style="display:block">
+      <span style="font-size:12.5px;font-weight:700;color:#4A4A4A">{{ t.fNotes }} <span style="color:#A0A6A0;font-weight:500">({{ t.optional }})</span></span>
+      <textarea name="notes" value="{{ trip.notes }}" onChange="{{ onField }}" rows="3" style="margin-top:6px;width:100%;border-radius:16px;border:1px solid #E6E8EC;background:#fff;padding:14px 16px;font-size:15.5px;resize:none"></textarea>
+    </label>
+  </div>
+</div>
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none">
+  <div style="width:430px;max-width:100%;padding:14px 20px 26px;background:linear-gradient(180deg,rgba(248,249,247,0) 0%,#F8F9F7 40%);pointer-events:auto">
+    <button onClick="{{ startBefore }}" style="width:100%;height:58px;border-radius:999px;background:#14563C;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28);transition:transform .18s cubic-bezier(.4,0,.2,1)" style-hover="transform:translateY(-1px)" style-active="transform:translateY(0)">{{ t.continueCam }}
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+    </button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCam }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;min-height:100vh;background:#0E1512;display:flex;flex-direction:column">
+  <div style="padding:52px 20px 12px;display:flex;align-items:center;gap:12px">
+    <button onClick="{{ nav }}" data-s="home" aria-label="Close" style="width:40px;height:40px;margin-left:-8px;border-radius:14px;display:grid;place-items:center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+    </button>
+    <div style="flex:1">
+      <div style="font-size:15.5px;font-weight:700;color:#fff">{{ camTitle }}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:1px">{{ trip.mtn }} · {{ trip.id }}</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.12);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg>
+      </div>
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.12);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M9 3v18M15 3v18M3 9h18M3 15h18"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin:0 12px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.10);color:rgba(255,255,255,.86);font-size:13px;line-height:1.45;display:flex;gap:10px;align-items:flex-start">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8.2v.2M12 11v5"></path></svg>
+    <span>{{ camHint }}</span>
+  </div>
+
+  <div style="position:relative;margin:12px;border-radius:24px;overflow:hidden;flex:1;min-height:430px;background:radial-gradient(120% 90% at 30% 10%,#3A4A40 0%,#1B2620 60%,#121A16 100%)">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,rgba(0,0,0,.18) 100%)"></div>
+    <sc-for list="{{ scene }}" as="b" hint-placeholder-count="8">
+      <div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;border-radius:{{ b.r }}px;background:linear-gradient(135deg,{{ b.c }} 0%,{{ b.c2 }} 100%);box-shadow:0 10px 22px rgba(0,0,0,.35)">
+        <div style="position:absolute;inset:0;border-radius:{{ b.r }}px;background:linear-gradient(115deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,0) 42%,rgba(255,255,255,.16) 70%,rgba(255,255,255,0) 100%)"></div>
+        <sc-if value="{{ b.on }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;left:-6px;top:-6px;right:-6px;bottom:-6px;border:2px solid #D6FD91;border-radius:{{ b.r2 }}px;box-shadow:0 0 0 3px rgba(214,253,145,.18);animation:boxin .22s cubic-bezier(.22,1,.36,1) both">
+            <sc-if value="{{ b.lab }}" hint-placeholder-val="{{ true }}">
+              <div style="position:absolute;left:{{ b.lLeft }};right:{{ b.lRight }};top:{{ b.lTop }};max-width:{{ b.lMax }};height:21px;padding:0 7px;border-radius:7px;background:#D6FD91;color:#173D26;font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px">{{ b.n }}<span style="opacity:.62">{{ b.cf }}%</span></div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <div style="position:absolute;left:0;right:0;top:0;height:14%;background:linear-gradient(180deg,rgba(214,253,145,0) 0%,rgba(214,253,145,.22) 80%,rgba(214,253,145,.5) 100%);animation:sweep 2.6s linear infinite;pointer-events:none"></div>
+    <div style="position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:rgba(14,21,18,.62);backdrop-filter:blur(14px);color:#fff;font-size:12.5px;font-weight:700">
+      <span style="width:7px;height:7px;border-radius:50%;background:#D6FD91;box-shadow:0 0 0 4px rgba(214,253,145,.2)"></span>{{ liveCount }} {{ t.found }}
+    </div>
+    <sc-if value="{{ hasShots }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;right:14px;top:14px;height:32px;padding:0 12px;border-radius:999px;background:rgba(14,21,18,.62);backdrop-filter:blur(14px);color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:7px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="3"></rect><path d="m6 16 4.5-4.5 3.5 3.5 2.5-2.5 3.5 3.5"></path></svg>{{ shots }} {{ t.photos }}
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="padding:10px 20px 34px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <button onClick="{{ capture }}" aria-label="Import" style="width:52px;height:52px;border-radius:17px;background:rgba(255,255,255,.12);display:grid;place-items:center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="3"></rect><path d="m6 16 4.5-4.5 3.5 3.5 2.5-2.5 3.5 3.5"></path></svg>
+      </button>
+      <button onClick="{{ capture }}" aria-label="Capture" style="width:78px;height:78px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.28);display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.4);transition:transform .18s cubic-bezier(.4,0,.2,1)" style-active="transform:scale(.94)">
+        <div style="width:56px;height:56px;border-radius:50%;background:#14563C;display:grid;place-items:center">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>
+        </div>
+      </button>
+      <button onClick="{{ finishCapture }}" style="width:52px;height:52px;border-radius:17px;background:#D6FD91;display:grid;place-items:center" aria-label="Done">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#173D26" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"></path></svg>
+      </button>
+    </div>
+    <div style="margin-top:12px;text-align:center;font-size:12px;color:rgba(255,255,255,.55)">{{ t.camFooter }}</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProc }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:40px">
+  <div style="width:150px;height:150px;border-radius:34px;background:linear-gradient(135deg,#2B3A32 0%,#16201B 100%);position:relative;overflow:hidden;box-shadow:0 20px 48px rgba(15,23,42,.18)">
+    <sc-for list="{{ scene }}" as="b" hint-placeholder-count="6">
+      <div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;border-radius:4px;background:{{ b.c }};opacity:.9"></div>
+    </sc-for>
+    <div style="position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 35%,rgba(214,253,145,.35) 50%,rgba(255,255,255,0) 65%);background-size:200% 100%;animation:shimmer 1.3s linear infinite"></div>
+  </div>
+  <div style="text-align:center">
+    <div style="font-size:19px;font-weight:800;letter-spacing:-.01em">{{ procMsg }}</div>
+    <div style="margin-top:6px;font-size:13.5px;color:#7A7A7A">{{ shots }} {{ t.photos }} · {{ t.onDevice }}</div>
+  </div>
+  <div style="width:210px;height:6px;border-radius:999px;background:#E1E6E1;overflow:hidden">
+    <div style="height:100%;width:{{ progW }};border-radius:999px;background:linear-gradient(90deg,#2FA36B,#14563C);transition:width .45s cubic-bezier(.22,1,.36,1)"></div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:52px 20px 132px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ backToCam }}" aria-label="Back" style="width:40px;height:40px;margin-left:-8px;border-radius:14px;display:grid;place-items:center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+    </button>
+    <div style="flex:1">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.015em">{{ t.reviewTitle }}</div>
+      <div style="font-size:12.5px;color:#7A7A7A;margin-top:1px">{{ reviewStage }}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;padding:18px;border-radius:28px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 8px 24px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.7);display:flex;align-items:center;gap:18px">
+    <div>
+      <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#14563C">{{ itemTotal }}</div>
+      <div style="margin-top:4px;font-size:12px;color:#7A7A7A">{{ t.totalItems }}</div>
+    </div>
+    <div style="width:1px;height:40px;background:#E6E8EC"></div>
+    <div>
+      <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#14563C">{{ itemKinds }}</div>
+      <div style="margin-top:4px;font-size:12px;color:#7A7A7A">{{ t.kinds }}</div>
+    </div>
+    <div style="flex:1;text-align:right;font-size:11.5px;color:#7A7A7A;line-height:1.4">{{ t.gpsNote }}<br /><span style="color:#4A4A4A;font-weight:600">{{ gpsLine }}</span></div>
+  </div>
+
+  <p style="margin:20px 2px 12px;font-size:13.5px;color:#4A4A4A;line-height:1.5;text-wrap:pretty">{{ t.reviewSub }}</p>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ items }}" as="it" hint-placeholder-count="6">
+      <div style="padding:12px;border-radius:20px;background:#fff;border:1px solid #E6E8EC;box-shadow:0 2px 8px rgba(15,23,42,.06);display:flex;align-items:center;gap:12px;animation:fu .28s cubic-bezier(.22,1,.36,1) both">
+        <div style="width:52px;height:52px;border-radius:14px;flex:none;position:relative;overflow:hidden;background:linear-gradient(135deg,{{ it.c }} 0%,{{ it.c2 }} 100%)">
+          <div style="position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,0) 45%,rgba(255,255,255,.2) 72%,rgba(255,255,255,0) 100%)"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.label }}</div>
+          <div style="margin-top:5px;display:flex;align-items:center;gap:7px">
+            <span style="height:20px;padding:0 8px;border-radius:999px;background:{{ it.cfBg }};color:{{ it.cfFg }};font-size:10.5px;font-weight:700;display:inline-flex;align-items:center">{{ it.cf }}%</span>
+            <span style="font-size:11.5px;color:#9AA0A0">{{ it.cfLabel }}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex:none">
+          <button onClick="{{ dec }}" data-id="{{ it.id }}" aria-label="minus" style="width:36px;height:36px;border-radius:12px;background:#F1F4F1;display:grid;place-items:center">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+          </button>
+          <div style="min-width:30px;text-align:center;font-size:17px;font-weight:800;letter-spacing:-.02em">{{ it.qty }}</div>
+          <button onClick="{{ inc }}" data-id="{{ it.id }}" aria-label="plus" style="width:36px;height:36px;border-radius:12px;background:#E7F3EC;display:grid;place-items:center">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </button>
+          <button onClick="{{ del }}" data-id="{{ it.id }}" aria-label="delete" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9433A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l.9 13h9.2l.9-13"></path></svg>
+          </button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <button onClick="{{ openSheet }}" style="margin-top:12px;width:100%;height:52px;border-radius:18px;border:1px dashed #BFC9C1;background:rgba(255,255,255,.5);color:#14563C;font-size:14.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>{{ t.addManual }}
+  </button>
+</div>
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none">
+  <div style="width:430px;max-width:100%;padding:14px 20px 26px;background:linear-gradient(180deg,rgba(248,249,247,0) 0%,#F8F9F7 40%);pointer-events:auto">
+    <button onClick="{{ saveReview }}" style="width:100%;height:58px;border-radius:999px;background:#14563C;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28);transition:transform .18s cubic-bezier(.4,0,.2,1)" style-hover="transform:translateY(-1px)" style-active="transform:translateY(0)">{{ saveLabel }}</button>
+  </div>
+</div>
+<sc-if value="{{ sheet }}" hint-placeholder-val="{{ true }}">
+<div style="position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-end;background:rgba(15,23,18,.34);z-index:20">
+  <div style="width:430px;max-width:100%;background:#fff;border-radius:28px 28px 0 0;padding:18px 20px 30px;box-shadow:0 -20px 48px rgba(15,23,42,.18);animation:fu .26s cubic-bezier(.22,1,.36,1) both">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16.5px;font-weight:800;letter-spacing:-.01em">{{ t.addManual }}</div>
+      <button onClick="{{ closeSheet }}" aria-label="Close" style="width:36px;height:36px;border-radius:12px;background:#F1F4F1;display:grid;place-items:center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2.2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    </div>
+    <div style="margin-top:14px;height:50px;border-radius:16px;background:#F1F4F1;display:flex;align-items:center;gap:10px;padding:0 14px">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+      <input value="{{ q }}" onChange="{{ onQ }}" placeholder="{{ t.searchProduct }}" style="flex:1;border:0;background:none;font-size:15px;outline:none" />
+    </div>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:290px;overflow:auto">
+      <sc-for list="{{ catalog }}" as="p" hint-placeholder-count="5">
+        <button onClick="{{ addProduct }}" data-id="{{ p.id }}" style="width:100%;text-align:left;padding:10px;border-radius:16px;border:1px solid #E6E8EC;background:#fff;display:flex;align-items:center;gap:12px;transition:background .18s" style-hover="background:#F6F9F6">
+          <div style="width:40px;height:40px;border-radius:12px;flex:none;background:linear-gradient(135deg,{{ p.c }} 0%,{{ p.c2 }} 100%)"></div>
+          <span style="flex:1;font-size:14.5px;font-weight:600">{{ p.label }}</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ isCompare }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:52px 20px 150px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:18px;font-weight:800;letter-spacing:-.015em">{{ t.compareTitle }}</div>
+    <span style="font-size:12px;color:#7A7A7A">{{ trip.id }}</span>
+  </div>
+
+  <div style="margin-top:18px;padding:24px 18px 20px;border-radius:28px;background:rgba(255,255,255,.66);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.8);box-shadow:0 8px 24px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.7);display:flex;flex-direction:column;align-items:center;animation:pop .34s cubic-bezier(.22,1,.36,1) both">
+    <div style="width:172px;height:172px;border-radius:50%;background:conic-gradient({{ ringColor }} {{ pctStr }}, #E4E9E5 0);display:grid;place-items:center">
+      <div style="width:136px;height:136px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+        <div style="font-size:42px;font-weight:800;letter-spacing:-.035em;line-height:1;color:{{ ringColor }}">{{ pct }}%</div>
+        <div style="margin-top:5px;font-size:12px;color:#7A7A7A;text-align:center;max-width:100px;line-height:1.3">{{ t.returned }}</div>
+      </div>
+    </div>
+    <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%">
+      <div style="padding:10px;border-radius:16px;background:#EAF6EF;text-align:center">
+        <div style="font-size:19px;font-weight:800;color:#1E7A4F">{{ sum.matched }}</div>
+        <div style="font-size:11px;color:#4A6E5C;margin-top:2px">{{ t.matched }}</div>
+      </div>
+      <div style="padding:10px;border-radius:16px;background:#FDF1E3;text-align:center">
+        <div style="font-size:19px;font-weight:800;color:#B8791F">{{ sum.missing }}</div>
+        <div style="font-size:11px;color:#8A6425;margin-top:2px">{{ t.missingS }}</div>
+      </div>
+      <div style="padding:10px;border-radius:16px;background:#EEF3FB;text-align:center">
+        <div style="font-size:19px;font-weight:800;color:#3568B0">{{ sum.extra }}</div>
+        <div style="font-size:11px;color:#3B5E8C;margin-top:2px">{{ t.extraS }}</div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ isFail }}" hint-placeholder-val="{{ true }}">
+  <div style="margin-top:14px;padding:16px;border-radius:22px;background:#FDF6EA;border:1px solid #F2E2C6;display:flex;gap:12px;align-items:flex-start">
+    <div style="width:38px;height:38px;border-radius:13px;background:#F7E2BE;display:grid;place-items:center;flex:none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A9761C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.6v5M12 16.2v.4"></path></svg>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:-.01em">{{ t.failTitle }}</div>
+      <div style="margin-top:4px;font-size:13px;line-height:1.5;color:#5C4A2A;text-wrap:pretty">{{ t.failSub }}</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="margin-top:20px;display:flex;align-items:baseline;justify-content:space-between;padding:0 4px">
+    <div style="font-size:15.5px;font-weight:700">{{ t.itemBreakdown }}</div>
+    <div style="display:flex;gap:14px;font-size:11px;color:#7A7A7A">
+      <span>{{ t.before }}</span><span>{{ t.after }}</span>
+    </div>
+  </div>
+
+  <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+      <div style="padding:12px 14px;border-radius:18px;background:#fff;border:1px solid {{ r.bd }};box-shadow:0 2px 8px rgba(15,23,42,.05);display:flex;align-items:center;gap:12px">
+        <div style="width:8px;height:36px;border-radius:999px;background:{{ r.dot }};flex:none"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</div>
+          <div style="margin-top:3px;font-size:11.5px;font-weight:700;color:{{ r.dot }}">{{ r.statusLabel }}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex:none;font-variant-numeric:tabular-nums">
+          <span style="min-width:26px;text-align:right;font-size:15px;font-weight:700;color:#7A7A7A">{{ r.before }}</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C2C8C2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+          <span style="min-width:26px;text-align:right;font-size:17px;font-weight:800;color:{{ r.dot }}">{{ r.after }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none">
+  <div style="width:430px;max-width:100%;padding:14px 20px 26px;background:linear-gradient(180deg,rgba(248,249,247,0) 0%,#F8F9F7 45%);pointer-events:auto;display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ isFail }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ retake }}" style="width:100%;height:58px;border-radius:999px;background:#14563C;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28);transition:transform .18s cubic-bezier(.4,0,.2,1)" style-hover="transform:translateY(-1px)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>{{ t.retake }}
+      </button>
+      <button onClick="{{ confirmManual }}" style="width:100%;height:54px;border-radius:999px;background:#fff;border:1px solid #CBD5CD;color:#14563C;font-size:15.5px;font-weight:700">{{ t.confirmManual }}</button>
+    </sc-if>
+    <sc-if value="{{ isPassable }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ toPass }}" style="width:100%;height:58px;border-radius:999px;background:#14563C;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28)">{{ t.seeResult }}
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+      </button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPass }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;min-height:100vh;padding:64px 20px 130px;display:flex;flex-direction:column;align-items:center;text-align:center">
+  <div style="position:relative;width:196px;height:196px;display:grid;place-items:center;animation:pop .42s cubic-bezier(.22,1,.36,1) both">
+    <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(47,163,107,.34) 0%,rgba(47,163,107,0) 70%);filter:blur(6px)"></div>
+    <div style="position:absolute;inset:26px;border-radius:50%;border:1px solid rgba(20,86,60,.16)"></div>
+    <div style="width:112px;height:112px;border-radius:50%;background:linear-gradient(150deg,#1E7A4F 0%,#14563C 100%);display:grid;place-items:center;box-shadow:0 22px 54px rgba(20,86,60,.34)">
+      <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"></path></svg>
+    </div>
+  </div>
+  <div style="margin-top:10px;height:28px;padding:0 14px;border-radius:999px;background:#D6FD91;color:#173D26;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:7px">{{ passChip }}</div>
+  <h1 style="margin:16px 0 0;font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.15;text-wrap:balance">{{ t.passTitle }}</h1>
+  <p style="margin:10px 6px 0;font-size:15.5px;line-height:1.55;color:#4A4A4A;max-width:320px;text-wrap:pretty">{{ t.passSub }}</p>
+
+  <div style="margin-top:26px;width:100%;padding:18px;border-radius:28px;background:rgba(255,255,255,.66);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.8);box-shadow:0 8px 24px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.7);text-align:left">
+    <div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#14563C">{{ t.tripSummary }}</div>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:9px">
+      <sc-for list="{{ summaryRows }}" as="s" hint-placeholder-count="5">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px">
+          <span style="font-size:13px;color:#7A7A7A">{{ s.k }}</span>
+          <span style="font-size:13.5px;font-weight:700;text-align:right">{{ s.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none">
+  <div style="width:430px;max-width:100%;padding:14px 20px 26px;background:linear-gradient(180deg,rgba(248,249,247,0) 0%,#F8F9F7 45%);pointer-events:auto;display:flex;flex-direction:column;gap:10px">
+    <button onClick="{{ nav }}" data-s="officer" style="width:100%;height:58px;border-radius:999px;background:#14563C;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.28)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>{{ t.showOfficer }}
+    </button>
+    <button onClick="{{ finishTrip }}" style="width:100%;height:54px;border-radius:999px;background:#fff;border:1px solid #CBD5CD;color:#14563C;font-size:15.5px;font-weight:700">{{ t.finish }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOfficer }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:52px 20px 130px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ officerBack }}" aria-label="Back" style="width:40px;height:40px;margin-left:-8px;border-radius:14px;display:grid;place-items:center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+    </button>
+    <div>
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.015em">{{ t.officerTitle }}</div>
+      <div style="font-size:12.5px;color:#7A7A7A;margin-top:1px">{{ t.officerSub }}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:18px;padding:20px;border-radius:28px;background:#fff;border:1px solid #E6E8EC;box-shadow:0 8px 24px rgba(15,23,42,.08);display:flex;flex-direction:column;align-items:center">
+    <div style="padding:12px;border-radius:18px;background:#fff;border:1px solid #E6E8EC">
+      <div style="display:flex;flex-direction:column;gap:0">
+        <sc-for list="{{ qr }}" as="row" hint-placeholder-count="17">
+          <div style="display:flex;gap:0">
+            <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="17">
+              <div style="width:8px;height:8px;background:{{ cell.bg }}"></div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;font-weight:700;letter-spacing:.02em">{{ trip.id }}</div>
+    <div style="font-size:12px;color:#7A7A7A;margin-top:2px">{{ t.qrHint }}</div>
+  </div>
+
+  <div style="margin-top:14px;padding:18px;border-radius:24px;background:rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border:1px solid rgba(255,255,255,.75);box-shadow:0 2px 8px rgba(15,23,42,.06)">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ officerRows }}" as="s" hint-placeholder-count="5">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px">
+          <span style="font-size:13px;color:#7A7A7A">{{ s.k }}</span>
+          <span style="font-size:13.5px;font-weight:700;text-align:right">{{ s.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #E6E8EC;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:13px;color:#7A7A7A">{{ t.verdict }}</span>
+      <span style="height:28px;padding:0 12px;border-radius:999px;background:{{ verdictBg }};color:{{ verdictFg }};font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px">{{ verdictLabel }}</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ verified }}" hint-placeholder-val="{{ true }}">
+  <div style="margin-top:14px;padding:18px;border-radius:24px;background:#EAF6EF;border:1px solid #CFE7DA;display:flex;gap:12px;align-items:center;animation:fu .3s cubic-bezier(.22,1,.36,1) both">
+    <div style="width:44px;height:44px;border-radius:15px;background:#14563C;display:grid;place-items:center;flex:none">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D6FD91" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"></path></svg>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:-.01em;color:#14563C">{{ t.verified }}</div>
+      <div style="margin-top:3px;font-size:12.5px;color:#4A6E5C">{{ t.signedBy }} · Pos {{ trip.gate }} · 06:14</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="margin-top:22px;font-size:15.5px;font-weight:700">{{ t.queue }}</div>
+  <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ queue }}" as="q2" hint-placeholder-count="3">
+      <div style="padding:12px 14px;border-radius:18px;background:#fff;border:1px solid #E6E8EC;display:flex;align-items:center;gap:12px">
+        <div style="width:36px;height:36px;border-radius:12px;background:#F1F4F1;display:grid;place-items:center;font-size:13px;font-weight:800;color:#4A4A4A;flex:none">{{ q2.ini }}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700">{{ q2.name }}</div>
+          <div style="font-size:11.5px;color:#7A7A7A;margin-top:1px">{{ q2.id }} · {{ q2.group }}</div>
+        </div>
+        <span style="height:24px;padding:0 10px;border-radius:999px;background:{{ q2.bg }};color:{{ q2.fg }};font-size:11px;font-weight:700;display:inline-flex;align-items:center">{{ q2.st }}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none">
+  <div style="width:430px;max-width:100%;padding:14px 20px 26px;background:linear-gradient(180deg,rgba(248,249,247,0) 0%,#F8F9F7 45%);pointer-events:auto">
+    <button onClick="{{ verifyAction }}" style="width:100%;height:58px;border-radius:999px;background:{{ verifyBtnBg }};color:{{ verifyBtnFg }};font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 48px rgba(20,86,60,.24)">{{ verifyBtnLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHistory }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:54px 20px 112px">
+  <div style="font-size:24px;font-weight:800;letter-spacing:-.025em">{{ t.historyTitle }}</div>
+  <div style="margin-top:14px;height:50px;border-radius:16px;background:#fff;border:1px solid #E6E8EC;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 2px 8px rgba(15,23,42,.05)">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+    <input value="{{ hq }}" onChange="{{ onHq }}" placeholder="{{ t.searchTrips }}" style="flex:1;border:0;background:none;font-size:15px;outline:none" />
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+      <button onClick="{{ setFilter }}" data-v="{{ f.v }}" style="height:38px;padding:0 15px;border-radius:999px;font-size:13px;font-weight:600;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button>
+    </sc-for>
+  </div>
+  <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ historyList }}" as="tr" hint-placeholder-count="3">
+      <div style="padding:16px;border-radius:22px;background:#fff;border:1px solid #E6E8EC;box-shadow:0 2px 8px rgba(15,23,42,.06);transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,23,42,.08)">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:46px;height:46px;border-radius:15px;background:{{ tr.tint }};display:grid;place-items:center;flex:none">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ tr.ink }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 19 6.2-10.6L12.4 14l2.3-3.7L21.5 19H2.5Z"></path></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:800;letter-spacing:-.015em">{{ tr.mtn }}</div>
+            <div style="margin-top:3px;font-size:12.5px;color:#7A7A7A">{{ tr.gate }} · {{ tr.date }}</div>
+            <div style="margin-top:9px;display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:6px;border-radius:999px;background:#EDEFED;overflow:hidden">
+                <div style="height:100%;width:{{ tr.bar }};border-radius:999px;background:{{ tr.ink }}"></div>
+              </div>
+              <span style="font-size:12.5px;font-weight:800;color:{{ tr.ink }}">{{ tr.pct }}%</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFF1EF;display:flex;align-items:center;justify-content:space-between">
+          <span style="height:26px;padding:0 11px;border-radius:999px;background:{{ tr.tint }};color:{{ tr.ink }};font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px">{{ tr.label }}</span>
+          <span style="font-size:12px;color:#9AA0A0">{{ tr.id }} · {{ tr.items }} {{ t.itemsShort }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ true }}">
+<div style="position:relative;padding:54px 20px 112px">
+  <div style="font-size:24px;font-weight:800;letter-spacing:-.025em">{{ t.settingsTitle }}</div>
+
+  <div style="margin-top:20px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#14563C">{{ t.language }}</div>
+  <div style="margin-top:10px;padding:5px;border-radius:16px;background:#EDEFED;display:flex;gap:4px">
+    <button onClick="{{ setLang }}" data-v="id" style="flex:1;height:44px;border-radius:12px;font-size:14.5px;font-weight:700;background:{{ langIdBg }};color:{{ langIdFg }};box-shadow:{{ langIdSh }}">Bahasa Indonesia</button>
+    <button onClick="{{ setLang }}" data-v="en" style="flex:1;height:44px;border-radius:12px;font-size:14.5px;font-weight:700;background:{{ langEnBg }};color:{{ langEnFg }};box-shadow:{{ langEnSh }}">English</button>
+  </div>
+
+  <div style="margin-top:22px;display:flex;flex-direction:column;gap:2px;border-radius:22px;background:#fff;border:1px solid #E6E8EC;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.05)">
+    <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F3F1">
+      <div>
+        <div style="font-size:14.5px;font-weight:700">{{ t.darkMode }}</div>
+        <div style="font-size:12px;color:#9AA0A0;margin-top:2px">{{ t.darkNote }}</div>
+      </div>
+      <button onClick="{{ toggleDark }}" aria-label="dark mode" style="width:52px;height:31px;border-radius:999px;background:{{ darkTrack }};position:relative;transition:background .18s;flex:none">
+        <span style="position:absolute;top:3px;left:{{ darkKnob }};width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.24);transition:left .18s cubic-bezier(.4,0,.2,1)"></span>
+      </button>
+    </div>
+    <sc-for list="{{ settingsRows }}" as="s" hint-placeholder-count="4">
+      <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F3F1">
+        <div>
+          <div style="font-size:14.5px;font-weight:700">{{ s.k }}</div>
+          <div style="font-size:12px;color:#9AA0A0;margin-top:2px">{{ s.sub }}</div>
+        </div>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C2C8C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9 6 6 6-6 6"></path></svg>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top:22px;padding:16px;border-radius:20px;background:#E7F3EC;border:1px solid #D2E8DB;display:flex;gap:12px;align-items:flex-start">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14563C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M4.5 19.5h15"></path></svg>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#14563C">{{ t.installTitle }}</div>
+      <div style="margin-top:3px;font-size:12.5px;line-height:1.5;color:#4A6E5C;text-wrap:pretty">{{ t.installSub }}</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;text-align:center;font-size:11.5px;color:#A0A6A0">Trash Return Tracker · v0.9 MVP</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+<div style="position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:10">
+  <div style="width:430px;max-width:100%;padding:10px 16px 22px;background:rgba(248,249,247,.86);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-top:1px solid #E6E8EC;pointer-events:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+    <button onClick="{{ nav }}" data-s="home" style="height:56px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:{{ navHomeBg }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ navHomeInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V21h13V9.5"></path></svg>
+      <span style="font-size:10.5px;font-weight:700;color:{{ navHomeInk }}">{{ t.navHome }}</span>
+    </button>
+    <button onClick="{{ nav }}" data-s="history" style="height:56px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:{{ navTripsBg }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ navTripsInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 19 6.2-10.6L12.4 14l2.3-3.7L21.5 19H2.5Z"></path></svg>
+      <span style="font-size:10.5px;font-weight:700;color:{{ navTripsInk }}">{{ t.navTrips }}</span>
+    </button>
+    <button onClick="{{ nav }}" data-s="settings" style="height:56px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:{{ navSetBg }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ navSetInk }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7"></path></svg>
+      <span style="font-size:10.5px;font-weight:700;color:{{ navSetInk }}">{{ t.navSettings }}</span>
+    </button>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:932},&quot;defaultLanguage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;id&quot;,&quot;en&quot;],&quot;default&quot;:&quot;id&quot;,&quot;tsType&quot;:&quot;'id' | 'en'&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;scanSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:150,&quot;max&quot;:900,&quot;step&quot;:10,&quot;default&quot;:380,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'splash', lang: null, revealed: 0, shots: 0, mode: 'before', phase: 0,
+    items: null, baseline: null, after: null, sheet: false, q: '', hq: '', filter: 'all',
+    dark: false, attempt: 1, verified: false, manual: false, active: false, finished: false,
+    gate: 'Ranu Pani', group: 4, trip: null
+  };
+
+  strings = {
+    id: {
+      tagline: 'Bawa sampahmu turun.', loading: 'Menyiapkan kamera…',
+      homeHead: 'Setiap bungkus, tercatat.', homeSub: 'Foto sampahmu sebelum naik dan sesudah turun. AI yang menghitung.',
+      start: 'Mulai pendakian baru', activeTrip: 'Pendakian aktif', stepAfterDue: 'Menunggu scan turun',
+      stepBefore: 'Sebelum naik', stepAfter: 'Sesudah turun', itemsShort: 'bungkus', scanAfterCta: 'Scan sampah setelah turun',
+      stTrips: 'Pendakian', stItems: 'Bungkus tercatat', stAvg: 'Rata-rata kembali',
+      recent: 'Pendakian terakhir', seeAll: 'Lihat semua',
+      navHome: 'Beranda', navTrips: 'Pendakian', navSettings: 'Pengaturan',
+      newTrip: 'Pendakian baru', tripId: 'ID Pendakian', autoGen: 'Dibuat otomatis',
+      fHiker: 'Nama pendaki', fId: 'NIK', fPhone: 'Nomor HP', fMountain: 'Gunung', fGate: 'Jalur masuk',
+      fClimb: 'Tanggal naik', fReturn: 'Perkiraan turun', fGroup: 'Jumlah anggota', fNotes: 'Catatan',
+      optional: 'opsional', people: 'orang', continueCam: 'Lanjut ke kamera',
+      camBefore: 'Foto sebelum naik', camAfter: 'Foto setelah turun',
+      camBeforeHint: 'Letakkan semua bungkus makanan dan minuman di permukaan datar. Ambil beberapa foto dari sudut berbeda.',
+      camAfterHint: 'Keluarkan semua sampah yang kamu bawa turun. Pisahkan supaya tidak menumpuk.',
+      found: 'terdeteksi', photos: 'foto', camFooter: 'Ketuk ✓ jika semua sudah difoto',
+      proc1: 'Mencari bungkus…', proc2: 'Menghitung sampah…', proc3: 'Hampir selesai…', onDevice: 'Diproses di perangkat',
+      reviewTitle: 'Hasil deteksi', reviewSub: 'Periksa hasilnya. Ubah jumlah atau tambah yang terlewat sebelum disimpan.',
+      stageBefore: 'Baseline sebelum naik', stageAfter: 'Sampah setelah turun',
+      totalItems: 'total bungkus', kinds: 'jenis', gpsNote: 'GPS & waktu otomatis',
+      addManual: 'Tambah manual', searchProduct: 'Cari produk…', saveBaseline: 'Simpan baseline',
+      saveAfter: 'Bandingkan hasil', lowConf: 'Perlu dicek', goodConf: 'Yakin', unknownItem: 'Tidak dikenal',
+      compareTitle: 'Perbandingan', returned: 'Sampah kembali', matched: 'Sesuai', missingS: 'Kurang', extraS: 'Tambahan',
+      before: 'Sebelum', after: 'Sesudah', itemBreakdown: 'Rincian per bungkus',
+      stMatched: 'Sesuai', stMissing: 'Belum kembali', stExtra: 'Tambahan',
+      failTitle: 'Sepertinya ada yang terlewat', failSub: 'Mungkin ada sampah yang belum masuk frame. Coba foto ulang dulu — biasanya langsung ketemu.',
+      retake: 'Foto ulang', confirmManual: 'Konfirmasi manual', seeResult: 'Lihat hasil',
+      passTitle: 'Lengkap. Terima kasih!', passSub: 'Semua sampahmu turun bersamamu. Gunung tetap bersih karena kamu.',
+      passChip: '100% kembali', passChipManual: 'Dikonfirmasi manual', tripSummary: 'Ringkasan pendakian',
+      showOfficer: 'Tunjukkan ke petugas', finish: 'Selesai',
+      officerTitle: 'Verifikasi petugas', officerSub: 'Scan QR pendaki atau pilih dari antrean.',
+      qrHint: 'Tunjukkan QR ini di pos pemeriksaan', verdict: 'Status', verify: 'Verifikasi & sahkan',
+      verified: 'Terverifikasi', signedBy: 'Disahkan petugas', queue: 'Antrean gerbang', done: 'Selesai',
+      historyTitle: 'Riwayat pendakian', searchTrips: 'Cari gunung atau ID…',
+      fAll: 'Semua', fPass: 'Lengkap', fFail: 'Belum lengkap', labelPass: 'Lengkap', labelFail: 'Belum lengkap',
+      settingsTitle: 'Pengaturan', language: 'Bahasa', darkMode: 'Mode gelap', darkNote: 'Ikuti pengaturan sistem',
+      sOffline: 'Data offline', sOfflineSub: '3 pendakian tersimpan di perangkat',
+      sExport: 'Ekspor pendakian', sExportSub: 'Unduh sebagai CSV atau PDF',
+      sAbout: 'Tentang aplikasi', sAboutSub: 'Versi, lisensi, kontributor',
+      sPrivacy: 'Kebijakan privasi', sPrivacySub: 'Foto tidak diunggah tanpa izin',
+      installTitle: 'Pasang ke layar utama', installSub: 'Buka lebih cepat dan tetap bisa dipakai tanpa sinyal di gerbang pendakian.',
+      unkSnack: 'Bungkus snack tak dikenal', unkBag: 'Kantong plastik tak dikenal', unkBottle: 'Botol tak dikenal',
+      unkSnackShort: 'Bungkus snack', unkBagShort: 'Kantong plastik', unkBottleShort: 'Botol',
+      qWaiting: 'Menunggu', qVerified: 'Sah', qScanning: 'Scan'
+    },
+    en: {
+      tagline: 'Take your trash home.', loading: 'Getting the camera ready…',
+      homeHead: 'Every wrapper, accounted for.', homeSub: 'Photograph your packaging before the hike and your trash after. The AI does the counting.',
+      start: 'Start new trip', activeTrip: 'Active trip', stepAfterDue: 'After-hike scan due',
+      stepBefore: 'Before hike', stepAfter: 'After hike', itemsShort: 'items', scanAfterCta: 'Scan trash after hike',
+      stTrips: 'Trips', stItems: 'Items tracked', stAvg: 'Avg returned',
+      recent: 'Recent trips', seeAll: 'See all',
+      navHome: 'Home', navTrips: 'Trips', navSettings: 'Settings',
+      newTrip: 'New trip', tripId: 'Trip ID', autoGen: 'Generated automatically',
+      fHiker: 'Hiker name', fId: 'National ID', fPhone: 'Phone number', fMountain: 'Mountain', fGate: 'Entry gate',
+      fClimb: 'Climb date', fReturn: 'Expected return', fGroup: 'Group size', fNotes: 'Notes',
+      optional: 'optional', people: 'people', continueCam: 'Continue to camera',
+      camBefore: 'Before-hike photo', camAfter: 'After-hike photo',
+      camBeforeHint: 'Place every food and drink package on a flat surface. Take a few photos from different angles.',
+      camAfterHint: 'Lay out all the trash you carried down. Spread it so nothing overlaps.',
+      found: 'detected', photos: 'photos', camFooter: 'Tap ✓ when everything is photographed',
+      proc1: 'Looking for packages…', proc2: 'Counting wrappers…', proc3: 'Almost done…', onDevice: 'Processed on device',
+      reviewTitle: 'Detection result', reviewSub: 'Check the result. Adjust quantities or add anything the AI missed before saving.',
+      stageBefore: 'Before-hike baseline', stageAfter: 'Trash brought down',
+      totalItems: 'items total', kinds: 'kinds', gpsNote: 'GPS & time saved',
+      addManual: 'Add item manually', searchProduct: 'Search products…', saveBaseline: 'Save baseline',
+      saveAfter: 'Compare with baseline', lowConf: 'Needs a check', goodConf: 'Confident', unknownItem: 'Unknown',
+      compareTitle: 'Comparison', returned: 'Trash returned', matched: 'Matched', missingS: 'Missing', extraS: 'Extra',
+      before: 'Before', after: 'After', itemBreakdown: 'Item breakdown',
+      stMatched: 'Matched', stMissing: 'Not returned', stExtra: 'Extra item',
+      failTitle: 'Looks like something was missed', failSub: 'A few wrappers probably stayed out of frame. Try one more photo — that usually finds them.',
+      retake: 'Retake photo', confirmManual: 'Confirm manually', seeResult: 'See result',
+      passTitle: 'All returned. Thank you!', passSub: 'Everything you carried up came back down with you. The mountain stays clean because of you.',
+      passChip: '100% returned', passChipManual: 'Confirmed manually', tripSummary: 'Trip summary',
+      showOfficer: 'Show to officer', finish: 'Finish',
+      officerTitle: 'Officer verification', officerSub: 'Scan the hiker QR or pick from the queue.',
+      qrHint: 'Show this QR at the checkpoint', verdict: 'Status', verify: 'Verify & sign off',
+      verified: 'Verified', signedBy: 'Signed off by officer', queue: 'Gate queue', done: 'Done',
+      historyTitle: 'Trip history', searchTrips: 'Search mountain or ID…',
+      fAll: 'All', fPass: 'Complete', fFail: 'Incomplete', labelPass: 'Complete', labelFail: 'Incomplete',
+      settingsTitle: 'Settings', language: 'Language', darkMode: 'Dark mode', darkNote: 'Follow system setting',
+      sOffline: 'Offline data', sOfflineSub: '3 trips stored on this device',
+      sExport: 'Export trip', sExportSub: 'Download as CSV or PDF',
+      sAbout: 'About', sAboutSub: 'Version, licence, contributors',
+      sPrivacy: 'Privacy policy', sPrivacySub: 'Photos are never uploaded without consent',
+      installTitle: 'Install to home screen', installSub: 'Opens faster and keeps working without signal at the trailhead gate.',
+      unkSnack: 'Unknown snack wrapper', unkBag: 'Unknown plastic bag', unkBottle: 'Unknown bottle',
+      unkSnackShort: 'Snack wrapper', unkBagShort: 'Plastic bag', unkBottleShort: 'Bottle',
+      qWaiting: 'Waiting', qVerified: 'Signed', qScanning: 'Scanning'
+    }
+  };
+
+  catalogRaw = [
+    { id: 'indomie', name: 'Indomie Goreng', c: '#E8562A', c2: '#B93A18' },
+    { id: 'aqua', name: 'Aqua 600ml', c: '#8FD3F0', c2: '#4E9FC4' },
+    { id: 'teh', name: 'Teh Botol Sosro', c: '#D6AE2E', c2: '#A07C15' },
+    { id: 'kopiko', name: 'Kopiko Candy', c: '#7A5636', c2: '#4C3320' },
+    { id: 'goodday', name: 'Good Day Coffee', c: '#C4553A', c2: '#8E3320' },
+    { id: 'lemin', name: 'Le Minerale', c: '#5FB2DC', c2: '#2F7CA8' },
+    { id: 'sq', name: 'SilverQueen', c: '#5A4A8C', c2: '#332A57' },
+    { id: 'chitato', name: 'Chitato', c: '#C93F3F', c2: '#8C2222' },
+    { id: 'ultra', name: 'Ultra Milk 250ml', c: '#4F6FB5', c2: '#2C4380' },
+    { id: 'nabati', name: 'Richeese Nabati', c: '#E0A32B', c2: '#A97210' },
+    { id: 'unk1', key: 'unkSnack', short: 'unkSnackShort', c: '#A6AEB6', c2: '#78828B' },
+    { id: 'unk2', key: 'unkBag', short: 'unkBagShort', c: '#C0CBD0', c2: '#8E9BA1' },
+    { id: 'unk3', key: 'unkBottle', short: 'unkBottleShort', c: '#AFC9C4', c2: '#7C9A94' }
+  ];
+
+  baselineRaw = [
+    { id: 'indomie', qty: 4, cf: 97 }, { id: 'aqua', qty: 2, cf: 95 }, { id: 'teh', qty: 3, cf: 92 },
+    { id: 'kopiko', qty: 15, cf: 88 }, { id: 'goodday', qty: 2, cf: 90 }, { id: 'lemin', qty: 1, cf: 93 },
+    { id: 'sq', qty: 2, cf: 86 }, { id: 'unk1', qty: 6, cf: 61 }, { id: 'unk2', qty: 4, cf: 58 }
+  ];
+
+  afterRaw1 = [
+    { id: 'indomie', qty: 4, cf: 96 }, { id: 'aqua', qty: 2, cf: 94 }, { id: 'teh', qty: 3, cf: 91 },
+    { id: 'kopiko', qty: 11, cf: 74 }, { id: 'goodday', qty: 2, cf: 89 }, { id: 'lemin', qty: 1, cf: 92 },
+    { id: 'sq', qty: 2, cf: 84 }, { id: 'unk1', qty: 4, cf: 57 }, { id: 'unk2', qty: 4, cf: 60 },
+    { id: 'unk3', qty: 1, cf: 54 }
+  ];
+
+  afterRaw2 = [
+    { id: 'indomie', qty: 4, cf: 96 }, { id: 'aqua', qty: 2, cf: 95 }, { id: 'teh', qty: 3, cf: 93 },
+    { id: 'kopiko', qty: 15, cf: 82 }, { id: 'goodday', qty: 2, cf: 90 }, { id: 'lemin', qty: 1, cf: 93 },
+    { id: 'sq', qty: 2, cf: 87 }, { id: 'unk1', qty: 6, cf: 64 }, { id: 'unk2', qty: 4, cf: 62 },
+    { id: 'unk3', qty: 1, cf: 55 }
+  ];
+
+  sceneBefore = [
+    { id: 'indomie', x: 5, y: 9, w: 25, h: 13, r: 7 },
+    { id: 'indomie', x: 32, y: 6, w: 25, h: 13, r: 7 },
+    { id: 'aqua', x: 61, y: 5, w: 12, h: 29, r: 22 },
+    { id: 'aqua', x: 77, y: 8, w: 12, h: 29, r: 22 },
+    { id: 'teh', x: 5, y: 27, w: 13, h: 25, r: 18 },
+    { id: 'kopiko', x: 22, y: 25, w: 17, h: 10, r: 5, lab: 1 },
+    { id: 'goodday', x: 43, y: 24, w: 14, h: 17, r: 6 },
+    { id: 'lemin', x: 62, y: 41, w: 12, h: 26, r: 20, lab: 1 },
+    { id: 'sq', x: 5, y: 58, w: 26, h: 12, r: 5, lab: 1 },
+    { id: 'unk1', x: 35, y: 46, w: 21, h: 14, r: 9 },
+    { id: 'unk2', x: 34, y: 68, w: 25, h: 19, r: 11, lab: 1 },
+    { id: 'teh', x: 78, y: 44, w: 13, h: 25, r: 18 }
+  ];
+
+  sceneAfter = [
+    { id: 'unk2', x: 6, y: 9, w: 30, h: 22, r: 12 },
+    { id: 'indomie', x: 40, y: 7, w: 24, h: 12, r: 7 },
+    { id: 'aqua', x: 68, y: 5, w: 12, h: 27, r: 22 },
+    { id: 'teh', x: 84, y: 9, w: 12, h: 25, r: 18 },
+    { id: 'kopiko', x: 8, y: 38, w: 18, h: 11, r: 5, lab: 1 },
+    { id: 'goodday', x: 30, y: 34, w: 14, h: 16, r: 6 },
+    { id: 'unk1', x: 50, y: 35, w: 20, h: 14, r: 9, lab: 1 },
+    { id: 'lemin', x: 74, y: 41, w: 12, h: 24, r: 20 },
+    { id: 'sq', x: 8, y: 57, w: 24, h: 12, r: 5, lab: 1 },
+    { id: 'unk3', x: 40, y: 58, w: 12, h: 26, r: 20, lab: 1 },
+    { id: 'unk1', x: 58, y: 63, w: 20, h: 15, r: 9 }
+  ];
+
+  pastTrips = [
+    { id: 'TRT-2607-1183', mtn: 'Gunung Semeru', gate: 'Ranu Pani', date: '12 Jul 2026', pct: 100, items: 41 },
+    { id: 'TRT-2506-0942', mtn: 'Gunung Rinjani', gate: 'Sembalun', date: '28 Jun 2026', pct: 94, items: 33 },
+    { id: 'TRT-2405-0517', mtn: 'Gunung Prau', gate: 'Patak Banteng', date: '09 Jun 2026', pct: 100, items: 18 }
+  ];
+
+  gateOptions = ['Ranu Pani', 'Ayek-Ayek', 'Tumpang'];
+
+  queueRaw = [
+    { ini: 'BP', name: 'Bagas Prakoso', id: 'TRT-2907-2041', group: '4 org', st: 'qScanning' },
+    { ini: 'NR', name: 'Nadia Ramadhani', id: 'TRT-2907-2038', group: '2 org', st: 'qVerified' },
+    { ini: 'AS', name: 'Arif Setiawan', id: 'TRT-2907-2033', group: '6 org', st: 'qWaiting' }
+  ];
+
+  componentDidMount() {
+    this.timers = [];
+    this.timers.push(setTimeout(() => this.setState({ screen: 'home' }), 1700));
+  }
+  componentWillUnmount() { (this.timers || []).forEach(clearTimeout); clearInterval(this.iv); clearInterval(this.pv); }
+
+  prod(id) { return this.catalogRaw.find(p => p.id === id) || this.catalogRaw[0]; }
+  label(p, t) { return p.key ? t[p.key] : p.name; }
+
+  trip() {
+    return this.state.trip || {
+      id: 'TRT-2907-2041', hiker: 'Bagas Prakoso', phone: '0812 3344 5566', nik: '',
+      mtn: 'Gunung Semeru', gate: this.state.gate, group: this.state.group,
+      climb: '29 Jul 2026', ret: '31 Jul 2026', notes: ''
+    };
+  }
+  patchTrip(k, v) { this.setState(s => ({ trip: Object.assign({}, this.trip(), { [k]: v }) })); }
+
+  nav = e => { clearInterval(this.iv); this.setState({ screen: e.currentTarget.dataset.s, sheet: false }); };
+
+  startCam(mode) {
+    clearInterval(this.iv);
+    this.setState({ screen: 'cam', mode, revealed: 0, shots: 0 });
+    const speed = this.props.scanSpeed || 380;
+    const len = (mode === 'before' ? this.sceneBefore : this.sceneAfter).length;
+    this.iv = setInterval(() => {
+      this.setState(s => {
+        if (s.revealed >= len) { clearInterval(this.iv); return null; }
+        return { revealed: s.revealed + 1 };
+      });
+    }, speed);
+  }
+  startBefore = () => this.startCam('before');
+  scanAfter = () => this.startCam('after');
+  retake = () => { this.setState({ attempt: 2 }); this.startCam('after'); };
+  backToCam = () => this.startCam(this.state.mode);
+
+  capture = () => { this.setState(s => ({ shots: s.shots + 1 })); };
+
+  finishCapture = () => {
+    clearInterval(this.iv);
+    this.setState(s => ({ screen: 'proc', phase: 0, shots: Math.max(1, s.shots) }));
+    clearInterval(this.pv);
+    this.pv = setInterval(() => {
+      this.setState(s => {
+        if (s.phase >= 2) {
+          clearInterval(this.pv);
+          const raw = s.mode === 'before' ? this.baselineRaw : (s.attempt === 1 ? this.afterRaw1 : this.afterRaw2);
+          return { screen: 'review', items: raw.map(r => Object.assign({}, r)) };
+        }
+        return { phase: s.phase + 1 };
+      });
+    }, 780);
+  };
+
+  inc = e => this.bump(e.currentTarget.dataset.id, 1);
+  dec = e => this.bump(e.currentTarget.dataset.id, -1);
+  bump(id, d) {
+    this.setState(s => ({ items: s.items.map(i => i.id === id ? Object.assign({}, i, { qty: Math.max(0, i.qty + d), cf: 100 }) : i) }));
+  }
+  del = e => {
+    const id = e.currentTarget.dataset.id;
+    this.setState(s => ({ items: s.items.filter(i => i.id !== id) }));
+  };
+  openSheet = () => this.setState({ sheet: true, q: '' });
+  closeSheet = () => this.setState({ sheet: false });
+  onQ = e => this.setState({ q: e.target.value });
+  addProduct = e => {
+    const id = e.currentTarget.dataset.id;
+    this.setState(s => {
+      const found = s.items.find(i => i.id === id);
+      const items = found ? s.items.map(i => i.id === id ? Object.assign({}, i, { qty: i.qty + 1, cf: 100 }) : i)
+        : s.items.concat([{ id, qty: 1, cf: 100 }]);
+      return { items, sheet: false };
+    });
+  };
+
+  saveReview = () => {
+    const items = this.state.items;
+    if (this.state.mode === 'before') this.setState({ baseline: items, active: true, screen: 'home' });
+    else this.setState({ after: items, screen: 'compare' });
+  };
+
+  compare() {
+    const base = this.state.baseline || this.baselineRaw;
+    const after = this.state.after || [];
+    const ids = [];
+    base.forEach(i => ids.indexOf(i.id) < 0 && ids.push(i.id));
+    after.forEach(i => ids.indexOf(i.id) < 0 && ids.push(i.id));
+    let baseTotal = 0, matched = 0, missing = 0, extra = 0;
+    const rows = ids.map(id => {
+      const b = (base.find(i => i.id === id) || {}).qty || 0;
+      const a = (after.find(i => i.id === id) || {}).qty || 0;
+      baseTotal += b; matched += Math.min(a, b);
+      if (a < b) missing += b - a;
+      if (a > b) extra += a - b;
+      return { id, before: b, after: a, status: a >= b ? (a > b ? 'extra' : 'matched') : 'missing' };
+    });
+    const pct = this.state.manual ? 100 : (baseTotal ? Math.round(matched / baseTotal * 100) : 0);
+    return { rows, pct, baseTotal, matched: this.state.manual ? baseTotal : matched, missing: this.state.manual ? 0 : missing, extra };
+  }
+
+  toPass = () => this.setState({ screen: 'pass' });
+  confirmManual = () => this.setState({ manual: true, screen: 'pass' });
+  finishTrip = () => this.setState({ screen: 'home', active: false, finished: true, attempt: 1, manual: false, verified: false, after: null, baseline: null });
+  officerBack = () => this.setState({ screen: this.state.after ? 'pass' : 'home' });
+  verifyAction = () => { if (this.state.verified) this.finishTrip(); else this.setState({ verified: true }); };
+
+  setGate = e => this.setState({ gate: e.currentTarget.dataset.v, trip: Object.assign({}, this.trip(), { gate: e.currentTarget.dataset.v }) });
+  groupInc = () => { const g = Math.min(20, this.trip().group + 1); this.setState({ group: g }); this.patchTrip('group', g); };
+  groupDec = () => { const g = Math.max(1, this.trip().group - 1); this.setState({ group: g }); this.patchTrip('group', g); };
+  onField = e => this.patchTrip(e.target.name, e.target.value);
+  onHq = e => this.setState({ hq: e.target.value });
+  setFilter = e => this.setState({ filter: e.currentTarget.dataset.v });
+  setLang = e => this.setState({ lang: e.currentTarget.dataset.v });
+  toggleDark = () => this.setState(s => ({ dark: !s.dark }));
+
+  qrGrid() {
+    if (this._qr) return this._qr;
+    const n = 21, seed = 7;
+    const on = (r, c) => {
+      const fin = (rr, cc) => rr >= 0 && rr < 7 && cc >= 0 && cc < 7 && !(rr > 1 && rr < 5 && cc > 1 && cc < 5) === false ? null : null;
+      const inFinder = (rr, cc) => rr < 7 && cc < 7 || rr < 7 && cc >= n - 7 || rr >= n - 7 && cc < 7;
+      if (inFinder(r, c)) {
+        const rr = r < 7 ? r : r - (n - 7), cc = c < 7 ? c : c - (n - 7);
+        const d = Math.max(Math.abs(rr - 3), Math.abs(cc - 3));
+        return d === 3 || d <= 1;
+      }
+      const v = (r * 73 + c * 151 + seed * 31 + ((r * c) % 17) * 11) % 7;
+      return v < 3;
+    };
+    const rows = [];
+    for (let r = 0; r < n; r++) {
+      const cells = [];
+      for (let c = 0; c < n; c++) cells.push({ bg: on(r, c) ? '#14563C' : '#FFFFFF' });
+      rows.push({ cells });
+    }
+    this._qr = rows;
+    return rows;
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.defaultLanguage || 'id';
+    const t = this.strings[lang] || this.strings.id;
+    const s = this.state;
+    const trip = this.trip();
+    const scene = (s.mode === 'before' ? this.sceneBefore : this.sceneAfter).map((b, i) => {
+      const p = this.prod(b.id);
+      const raw = (s.mode === 'before' ? this.baselineRaw : (s.attempt === 1 ? this.afterRaw1 : this.afterRaw2)).find(r => r.id === b.id);
+      const nearRight = b.x + b.w > 64;
+      const nearTop = b.y < 15;
+      return Object.assign({}, b, {
+        c: p.c, c2: p.c2, n: p.short ? t[p.short] : this.label(p, t), cf: raw ? raw.cf : 70,
+        on: i < s.revealed, r2: b.r + 6, lab: !!b.lab,
+        lTop: nearTop ? '6px' : '-25px',
+        lLeft: nearTop ? '6px' : (nearRight ? 'auto' : '-2px'),
+        lRight: nearTop ? 'auto' : (nearRight ? '-2px' : 'auto'),
+        lMax: nearTop ? 'none' : '170px'
+      });
+    });
+    const liveCount = Math.min(s.revealed, scene.length);
+    const items = (s.items || []).map(i => {
+      const p = this.prod(i.id);
+      const low = i.cf < 70;
+      return Object.assign({}, i, {
+        label: this.label(p, t), c: p.c, c2: p.c2, cf: i.cf,
+        cfBg: low ? '#FDF1E3' : '#EAF6EF', cfFg: low ? '#B8791F' : '#1E7A4F',
+        cfLabel: low ? t.lowConf : t.goodConf
+      });
+    });
+    const cmp = this.compare();
+    const rows = cmp.rows.map(r => {
+      const p = this.prod(r.id);
+      const map = {
+        matched: { dot: '#2FA36B', bd: '#DCE9E1', statusLabel: t.stMatched },
+        missing: { dot: '#D08A1E', bd: '#F2E2C6', statusLabel: t.stMissing },
+        extra: { dot: '#3568B0', bd: '#DCE5F2', statusLabel: t.stExtra }
+      }[r.status];
+      return Object.assign({}, r, map, { label: this.label(p, t) });
+    }).sort((a, b) => (a.status === 'missing' ? -1 : 0) - (b.status === 'missing' ? -1 : 0));
+    const q = s.q.toLowerCase();
+    const catalog = this.catalogRaw.map(p => Object.assign({}, p, { label: this.label(p, t) }))
+      .filter(p => !q || p.label.toLowerCase().indexOf(q) >= 0);
+
+    const past = this.pastTrips.slice();
+    if (s.finished) past.unshift({ id: trip.id, mtn: trip.mtn, gate: trip.gate, date: trip.climb, pct: 100, items: cmp.baseTotal || 39 });
+    const deco = tr => {
+      const pass = tr.pct >= 100;
+      return Object.assign({}, tr, {
+        tint: pass ? '#EAF6EF' : '#FDF1E3', ink: pass ? '#1E7A4F' : '#B8791F',
+        label: pass ? t.labelPass : t.labelFail, bar: tr.pct + '%'
+      });
+    };
+    const hq = s.hq.toLowerCase();
+    const historyList = past.filter(tr => (!hq || tr.mtn.toLowerCase().indexOf(hq) >= 0 || tr.id.toLowerCase().indexOf(hq) >= 0))
+      .filter(tr => s.filter === 'all' || (s.filter === 'pass' ? tr.pct >= 100 : tr.pct < 100)).map(deco);
+
+    const chip = (active) => active
+      ? { bg: '#14563C', fg: '#FFFFFF', bd: '#14563C' }
+      : { bg: '#FFFFFF', fg: '#4A4A4A', bd: '#DDE2DD' };
+    const filters = [
+      Object.assign({ v: 'all', label: t.fAll }, chip(s.filter === 'all')),
+      Object.assign({ v: 'pass', label: t.fPass }, chip(s.filter === 'pass')),
+      Object.assign({ v: 'fail', label: t.fFail }, chip(s.filter === 'fail'))
+    ];
+    const gates = this.gateOptions.map(name => Object.assign({ name }, chip(trip.gate === name)));
+
+    const pass = cmp.pct >= 100;
+    const baseTotal = (s.baseline || this.baselineRaw).reduce((a, i) => a + i.qty, 0);
+    const navInk = k => s.screen === k ? '#14563C' : '#8A918A';
+    const navBg = k => s.screen === k ? '#E7F3EC' : 'transparent';
+
+    return {
+      t, trip, scene, liveCount, items, catalog, q: s.q, hq: s.hq, sheet: s.sheet, rows,
+      shots: s.shots, hasShots: s.shots > 0,
+      isSplash: s.screen === 'splash', isHome: s.screen === 'home', isNewTrip: s.screen === 'newtrip',
+      isCam: s.screen === 'cam', isProc: s.screen === 'proc', isReview: s.screen === 'review',
+      isCompare: s.screen === 'compare', isPass: s.screen === 'pass', isOfficer: s.screen === 'officer',
+      isHistory: s.screen === 'history', isSettings: s.screen === 'settings',
+      showNav: ['home', 'history', 'settings'].indexOf(s.screen) >= 0,
+      hasActive: s.active, noActive: !s.active,
+      camTitle: s.mode === 'before' ? t.camBefore : t.camAfter,
+      camHint: s.mode === 'before' ? t.camBeforeHint : t.camAfterHint,
+      procMsg: [t.proc1, t.proc2, t.proc3][s.phase] || t.proc3,
+      progW: [34, 68, 94][s.phase] + '%',
+      reviewStage: s.mode === 'before' ? t.stageBefore : t.stageAfter,
+      saveLabel: s.mode === 'before' ? t.saveBaseline : t.saveAfter,
+      itemTotal: items.reduce((a, i) => a + i.qty, 0), itemKinds: items.length,
+      gpsLine: '-8.1077, 112.9220 · 06:12',
+      baseTotal,
+      pct: cmp.pct, pctStr: cmp.pct + '%', ringColor: pass ? '#2FA36B' : '#D08A1E',
+      sum: { matched: cmp.matched, missing: cmp.missing, extra: cmp.extra },
+      isFail: !pass, isPassable: pass,
+      passChip: s.manual ? t.passChipManual : t.passChip,
+      summaryRows: [
+        { k: t.fMountain, v: trip.mtn }, { k: t.fGate, v: trip.gate },
+        { k: t.tripId, v: trip.id }, { k: t.totalItems, v: cmp.baseTotal + ' ' + t.itemsShort },
+        { k: t.returned, v: cmp.pct + '%' }, { k: t.fGroup, v: trip.group + ' ' + t.people }
+      ],
+      officerRows: [
+        { k: t.fHiker, v: trip.hiker }, { k: t.tripId, v: trip.id },
+        { k: t.fMountain, v: trip.mtn + ' · ' + trip.gate },
+        { k: t.fGroup, v: trip.group + ' ' + t.people },
+        { k: t.returned, v: cmp.pct + '% (' + cmp.matched + '/' + cmp.baseTotal + ')' }
+      ],
+      verdictLabel: s.manual ? t.passChipManual : (pass ? t.labelPass : t.labelFail),
+      verdictBg: pass ? '#EAF6EF' : '#FDF1E3', verdictFg: pass ? '#1E7A4F' : '#B8791F',
+      verified: s.verified,
+      verifyBtnLabel: s.verified ? t.done : t.verify,
+      verifyBtnBg: s.verified ? '#FFFFFF' : '#14563C',
+      verifyBtnFg: s.verified ? '#14563C' : '#FFFFFF',
+      queue: this.queueRaw.map(q2 => Object.assign({}, q2, {
+        st: t[q2.st],
+        bg: q2.st === 'qVerified' ? '#EAF6EF' : (q2.st === 'qScanning' ? '#E7F3EC' : '#F1F4F1'),
+        fg: q2.st === 'qVerified' ? '#1E7A4F' : (q2.st === 'qScanning' ? '#14563C' : '#7A7A7A')
+      })),
+      qr: this.qrGrid(),
+      recent: past.slice(0, 2).map(deco), historyList, filters, gates,
+      stat: { trips: past.length, items: past.reduce((a, x) => a + x.items, 0), avg: Math.round(past.reduce((a, x) => a + x.pct, 0) / past.length) + '%' },
+      settingsRows: [
+        { k: t.sOffline, sub: t.sOfflineSub }, { k: t.sExport, sub: t.sExportSub },
+        { k: t.sAbout, sub: t.sAboutSub }, { k: t.sPrivacy, sub: t.sPrivacySub }
+      ],
+      langIdBg: lang === 'id' ? '#FFFFFF' : 'transparent', langIdFg: lang === 'id' ? '#14563C' : '#7A7A7A',
+      langIdSh: lang === 'id' ? '0 2px 8px rgba(15,23,42,.08)' : 'none',
+      langEnBg: lang === 'en' ? '#FFFFFF' : 'transparent', langEnFg: lang === 'en' ? '#14563C' : '#7A7A7A',
+      langEnSh: lang === 'en' ? '0 2px 8px rgba(15,23,42,.08)' : 'none',
+      darkTrack: s.dark ? '#14563C' : '#DDE2DD', darkKnob: s.dark ? '24px' : '3px',
+      navHomeInk: navInk('home'), navHomeBg: navBg('home'),
+      navTripsInk: navInk('history'), navTripsBg: navBg('history'),
+      navSetInk: navInk('settings'), navSetBg: navBg('settings'),
+      nav: this.nav, startBefore: this.startBefore, scanAfter: this.scanAfter, capture: this.capture,
+      finishCapture: this.finishCapture, backToCam: this.backToCam, inc: this.inc, dec: this.dec, del: this.del,
+      openSheet: this.openSheet, closeSheet: this.closeSheet, onQ: this.onQ, addProduct: this.addProduct,
+      saveReview: this.saveReview, retake: this.retake, confirmManual: this.confirmManual, toPass: this.toPass,
+      finishTrip: this.finishTrip, officerBack: this.officerBack, verifyAction: this.verifyAction,
+      setGate: this.setGate, groupInc: this.groupInc, groupDec: this.groupDec, onField: this.onField,
+      onHq: this.onHq, setFilter: this.setFilter, setLang: this.setLang, toggleDark: this.toggleDark
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+/* Design tokens, fonts and keyframes — values taken directly from the
+   `Trash Return Tracker.dc.html` prototype (forest-green shift of the
+   Dhany Indraswara design system). */
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-display: swap;
+}
+
+:root {
+  /* Brand */
+  --brand: #14563C;
+  --brand-deep: #173D26;
+  --brand-mid: #1B6B47;
+  --brand-bright: #1E7A4F;
+  --brand-leaf: #2FA36B;
+  --lime: #D6FD91;
+
+  /* Surfaces */
+  --page-outer: #E9EDE9;
+  --page: #F8F9F7;
+  --white: #ffffff;
+  --surface-quiet: #F1F4F1;
+  --surface-mint: #E7F3EC;
+  --surface-mint-soft: #EAF6EF;
+  --surface-camera: #0E1512;
+
+  /* Text */
+  --text: #1F1F1F;
+  --text-secondary: #4A4A4A;
+  --text-muted: #7A7A7A;
+  --text-faint: #9AA0A0;
+  --text-fainter: #A0A6A0;
+  --text-nav-idle: #8A918A;
+  --text-mint-ink: #4A6E5C;
+
+  /* Lines */
+  --line: #E6E8EC;
+  --line-mint: #D2E8DB;
+  --line-soft: #EFF1EF;
+  --line-softer: #F1F3F1;
+  --line-track: #EDEFED;
+  --line-chip: #DDE2DD;
+  --line-btn: #CBD5CD;
+  --line-dashed: #BFC9C1;
+  --line-icon: #C2C8C2;
+  --line-step: #C9CFC9;
+  --line-track-alt: #E1E6E1;
+  --line-ring: #E4E9E5;
+
+  /* Status */
+  --warn-bg: #FDF1E3;
+  --warn-ink: #B8791F;
+  --warn-dot: #D08A1E;
+  --warn-panel: #FDF6EA;
+  --warn-line: #F2E2C6;
+  --warn-icon-bg: #F7E2BE;
+  --warn-icon-ink: #A9761C;
+  --warn-label: #8A6425;
+  --warn-body: #5C4A2A;
+  --info-bg: #EEF3FB;
+  --info-ink: #3568B0;
+  --info-label: #3B5E8C;
+  --info-line: #DCE5F2;
+  --ok-line: #DCE9E1;
+  --ok-line-strong: #CFE7DA;
+  --danger: #B9433A;
+
+  /* Elevation */
+  --shadow-xs: 0 2px 8px rgba(15, 23, 42, .06);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, .05);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, .08);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, .18);
+  --shadow-brand: 0 18px 48px rgba(20, 86, 60, .28);
+  --shadow-brand-hover: 0 22px 56px rgba(20, 86, 60, .36);
+  --shadow-inner-soft: inset 0 1px 0 rgba(255, 255, 255, .7);
+
+  /* Motion — everything stays under 250ms per the brief */
+  --ease-out-quint: cubic-bezier(.22, 1, .36, 1);
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --dur-hover: .18s;
+
+  /* Layout */
+  --frame-width: 430px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--page-outer);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+
+button {
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text);
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid rgba(20, 86, 60, .35);
+  outline-offset: 1px;
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(.94); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes boxin {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes sweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(700%); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: .55; transform: scale(1); }
+  50% { opacity: .8; transform: scale(1.06); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
