@@ -8,8 +8,12 @@
  *   navigations   → network first, fall back to the cached shell
  *   same-origin GET → stale-while-revalidate (hashed build assets, fonts, icons)
  */
-const CACHE = 'trt-v1';
-const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
+const CACHE = 'trt-v2';
+// Absolute forms of the two shell entries, resolved once against the
+// worker's scope so lookups match what install() stored.
+const SHELL_HTML = new URL('./index.html', self.location).pathname;
+const SHELL_ROOT = new URL('./', self.location).pathname;
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,10 +42,10 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
+          caches.open(CACHE).then((cache) => cache.put(SHELL_HTML, copy));
           return response;
         })
-        .catch(() => caches.match('/index.html').then((cached) => cached || caches.match('/'))),
+        .catch(() => caches.match(SHELL_HTML).then((cached) => cached || caches.match(SHELL_ROOT))),
     );
     return;
   }

@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(
 // Offline shell. Registered after load so it never delays first paint.
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {
       /* offline support is a progressive enhancement — ignore failures */
     });
   });

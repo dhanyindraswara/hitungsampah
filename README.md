@@ -26,6 +26,23 @@ npm run icons      # regenerate ikon PNG dari public/icon.svg
 `dist/` adalah bundle statis — bisa langsung dideploy ke GitHub Pages, Netlify,
 Vercel, atau Cloudflare Pages tanpa server dan tanpa API key.
 
+## Live
+
+**https://dhanyindraswara.github.io/hitungsampah/**
+
+Setiap push ke `main` otomatis di-build dan dideploy lewat
+`.github/workflows/deploy.yml`. Kalau ini deploy pertama dan halamannya masih
+404, buka **Settings → Pages** dan pastikan *Source* = **GitHub Actions**, lalu
+jalankan ulang workflow-nya dari tab Actions.
+
+Build-nya pakai `base: './'` (path relatif), jadi bundle yang sama jalan di
+sub-folder GitHub Pages maupun di root domain kalau nanti pindah ke Vercel atau
+Netlify — tidak perlu diubah apa-apa.
+
+Kameranya jalan di URL itu karena `github.io` sudah HTTPS. Kalau kamu tes lewat
+IP LAN (`http://192.168.x.x`), browser tidak akan memberikan kamera — pakai
+`localhost` atau HTTPS.
+
 ## Struktur
 
 ```
