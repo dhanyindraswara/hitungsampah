@@ -29,6 +29,13 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # .nojekyll keeps Pages from running the artifact through Jekyll.
+      # 404.html serves the app for any unknown path instead of a GitHub 404.
+      - name: Prepare artifact
+        run: |
+          touch dist/.nojekyll
+          cp dist/index.html dist/404.html
+
       # enablement turns Pages on for the repo the first time this runs, so no
       # manual switch is needed. If the org forbids it, flip Settings → Pages →
       # Source to "GitHub Actions" once and re-run.

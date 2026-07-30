@@ -31,9 +31,13 @@ Vercel, atau Cloudflare Pages tanpa server dan tanpa API key.
 **https://dhanyindraswara.github.io/hitungsampah/**
 
 Setiap push ke `main` otomatis di-build dan dideploy lewat
-`.github/workflows/deploy.yml`. Kalau ini deploy pertama dan halamannya masih
-404, buka **Settings → Pages** dan pastikan *Source* = **GitHub Actions**, lalu
-jalankan ulang workflow-nya dari tab Actions.
+`.github/workflows/deploy.yml`.
+
+> **Wajib sekali di awal:** buka **Settings → Pages → Build and deployment** dan
+> setel *Source* = **GitHub Actions**. Kalau masih "Deploy from a branch", Pages
+> menyajikan `index.html` di root repo — itu file sumber Vite yang menunjuk ke
+> `/src/main.jsx`, sehingga halaman tampil **putih kosong**. Gejalanya: di tab
+> Actions ada workflow bernama `pages build and deployment` yang jalan.
 
 Build-nya pakai `base: './'` (path relatif), jadi bundle yang sama jalan di
 sub-folder GitHub Pages maupun di root domain kalau nanti pindah ke Vercel atau
