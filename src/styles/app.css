@@ -504,6 +504,19 @@
   animation: boxin .22s var(--ease-out-quint) both;
 }
 
+/* A live detection, sitting straight on the video rather than on a mock object.
+   The transition keeps the box gliding between scans instead of teleporting. */
+.camera__find {
+  position: absolute;
+  border: 2px solid var(--lime);
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px rgba(214, 253, 145, .18);
+  animation: boxin .22s var(--ease-out-quint) both;
+  transition: left .28s var(--ease-standard), top .28s var(--ease-standard),
+              width .28s var(--ease-standard), height .28s var(--ease-standard);
+  pointer-events: none;
+}
+
 .camera__tag {
   position: absolute;
   height: 21px;

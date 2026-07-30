@@ -12,7 +12,7 @@ function formatBytes(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function Switch({ on, label, onToggle }) {
+function Switch({ on, label, onToggle, disabled = false }) {
   return (
     <button
       type="button"
@@ -20,7 +20,12 @@ function Switch({ on, label, onToggle }) {
       role="switch"
       aria-checked={on}
       aria-label={label}
-      style={{ background: on ? 'var(--brand)' : 'var(--line-chip)' }}
+      disabled={disabled}
+      style={{
+        background: on ? 'var(--brand)' : 'var(--line-chip)',
+        opacity: disabled ? 0.45 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
       onClick={onToggle}
     >
       <span className="switch__knob" style={{ left: on ? 24 : 3 }} />
@@ -182,6 +187,21 @@ export default function Settings() {
       </div>
 
       <div className="settings-list">
+        <div className="settings-row">
+          <div>
+            <div className="settings-row__title">{t.autoScan}</div>
+            <div className="settings-row__sub">
+              {state.demo ? t.demoOverrides : state.auto ? t.autoScanSub : t.autoScanOff}
+            </div>
+          </div>
+          <Switch
+            on={state.auto && !state.demo}
+            label={t.autoScan}
+            disabled={state.demo}
+            onToggle={actions.toggleAuto}
+          />
+        </div>
+
         <div className="settings-row">
           <div>
             <div className="settings-row__title">{t.demoMode}</div>

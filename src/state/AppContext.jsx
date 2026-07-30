@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef } fro
 import {
   getDetector,
   manualDetector,
+  visionDetector,
+  scriptedDetector,
   SCAN_SPEED_MS,
   PROCESS_PHASE_MS,
   SPLASH_MS,
@@ -19,6 +21,7 @@ const initialState = {
   lang: DEFAULT_LANGUAGE,
   dark: false,
   demo: false,
+  auto: true,
   hydrated: false,
 
   trips: [],
@@ -79,6 +82,17 @@ function reducer(state, action) {
 
     case 'capture':
       return { ...state, photos: [...state.photos, action.photo] };
+
+    // The detector's answer for one still, filed against the photo it came
+    // from. Arrives a moment after the capture itself, since reading the frame
+    // is async and the shutter should not wait for it.
+    case 'photoDetections':
+      return {
+        ...state,
+        photos: state.photos.map((photo) =>
+          photo.id === action.id ? { ...photo, detections: action.detections } : photo,
+        ),
+      };
 
     case 'dropPhoto': {
       const photo = state.photos.find((p) => p.id === action.id);
@@ -174,6 +188,9 @@ function reducer(state, action) {
     case 'toggleDemo':
       return { ...state, demo: !state.demo };
 
+    case 'toggleAuto':
+      return { ...state, auto: !state.auto };
+
     case 'clearData':
       releasePhotos(state.photos);
       return {
@@ -182,6 +199,7 @@ function reducer(state, action) {
         lang: state.lang,
         dark: state.dark,
         demo: state.demo,
+        auto: state.auto,
         screen: 'settings',
         trips: [],
         trip: createSampleTrip(),
@@ -195,7 +213,14 @@ function reducer(state, action) {
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const hydrated = state.hydrated;
-  const detector = useMemo(() => getDetector(state.demo ? 'demo' : manualDetector.id), [state.demo]);
+  // Demo playback wins if it is on; otherwise the hiker chooses between the
+  // on-device detector and counting by hand.
+  const detectorId = state.demo
+    ? scriptedDetector.id
+    : state.auto
+      ? visionDetector.id
+      : manualDetector.id;
+  const detector = useMemo(() => getDetector(detectorId), [detectorId]);
 
   // ---- Load from device storage -------------------------------------------
   useEffect(() => {
@@ -213,6 +238,7 @@ export function AppProvider({ children }) {
           lang: settings?.lang ?? DEFAULT_LANGUAGE,
           dark: settings?.dark ?? false,
           demo: settings?.demo ?? false,
+          auto: settings?.auto ?? true,
         },
       });
       if (!trips) writeValue(KEYS.trips, seedTrips);
@@ -223,8 +249,15 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (hydrated) writeValue(KEYS.settings, { lang: state.lang, dark: state.dark, demo: state.demo });
-  }, [hydrated, state.lang, state.dark, state.demo]);
+    if (hydrated) {
+      writeValue(KEYS.settings, {
+        lang: state.lang,
+        dark: state.dark,
+        demo: state.demo,
+        auto: state.auto,
+      });
+    }
+  }, [hydrated, state.lang, state.dark, state.demo, state.auto]);
 
   useEffect(() => {
     if (hydrated) writeValue(KEYS.trips, state.trips);
@@ -300,9 +333,11 @@ export function AppProvider({ children }) {
       retake: () => dispatch({ type: 'startCamera', mode: 'after', attempt: 2 }),
       backToCamera: (mode) => dispatch({ type: 'startCamera', mode }),
       capture: (photo) => dispatch({ type: 'capture', photo }),
+      attachDetections: (id, detections) => dispatch({ type: 'photoDetections', id, detections }),
       dropPhoto: (id) => dispatch({ type: 'dropPhoto', id }),
 
-      // The demo detector earns its processing screen; manual counting goes
+      // A detector that counts earns its processing screen — where the stills
+      // it has already read are folded into one list. Manual counting goes
       // straight to the list the hiker is about to fill in.
       finishCapture: () => {
         if (detectorRef.current.autoCounts) {
@@ -349,6 +384,7 @@ export function AppProvider({ children }) {
       setLang: (value) => dispatch({ type: 'setLang', value }),
       toggleDark: () => dispatch({ type: 'toggleDark' }),
       toggleDemo: () => dispatch({ type: 'toggleDemo' }),
+      toggleAuto: () => dispatch({ type: 'toggleAuto' }),
 
       finishTrip: () => {
         const { trip, trips, baseline, after } = stateRef.current;
