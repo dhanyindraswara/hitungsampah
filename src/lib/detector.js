@@ -5,40 +5,51 @@
  *
  *   id              string   stable identifier, persisted in settings
  *   autoCounts      boolean  true if it produces counts on its own
- *   overlay(mode)   Box[]    boxes to draw over the viewfinder ([] if none)
+ *   scripted        boolean  true if it replays canned data instead of reading
+ *                            the camera — the camera screen hides the
+ *                            viewfinder entirely for these
+ *   overlay(mode)   Box[]    scripted boxes for the viewfinder ([] if none)
+ *   scan(source)    Promise<Box[]> | undefined
+ *                            reads one live frame or one still, for the boxes
+ *                            drawn over the camera. Absent when the detector
+ *                            cannot look at pixels.
  *   detect(input)   Promise<Detection[]>
  *
  *   input      { mode: 'before'|'after', attempt: number, frames: Frame[] }
- *   Frame      { id, blob, url, w, h }     captured JPEG stills
- *   Box        { id, x, y, w, h, r, lab }  x/y/w/h are % of the viewfinder
- *   Detection  { id, qty, cf }             cf = confidence 0–100
+ *   Frame      { id, blob, url, w, h, detections? }   captured JPEG stills
+ *   Box        { id, x, y, w, h, cf }     scan boxes: fractions of the frame
+ *   Detection  { id, qty, cf }            cf = confidence 0–100
  *
- * Two implementations ship today:
+ * Three implementations ship today:
  *
- *   manualDetector    real camera, no automatic counting — the hiker builds the
- *                     list on the review screen. This is the default.
+ *   visionDetector    the default. Reads the actual camera frames on the device
+ *                     — live while framing, and again on every shutter press —
+ *                     and arrives at the review screen with the list filled in.
+ *   manualDetector    real camera, no automatic counting. Settings → Deteksi
+ *                     otomatis off, for when the surface defeats the detector.
  *   scriptedDetector  replays the scenes from the design, for demos and pitches.
  *                     Enabled by the "Mode demo" switch in Settings.
  *
- * ── Adding real AI later ────────────────────────────────────────────────────
- * Write a third object with the same four members:
+ * ── Swapping in a trained model later ───────────────────────────────────────
+ * Write a fourth object with the same members:
  *
  *   export const modelDetector = {
  *     id: 'model',
  *     autoCounts: true,
- *     overlay: () => [],                        // or live boxes from the model
+ *     overlay: () => [],
+ *     async scan(source, opts) { return runModel(source); },   // live boxes
  *     async detect({ frames }) {
- *       const raw = await runModel(frames);     // ONNX Runtime Web / TFLite /
- *       return mergeAcrossFrames(raw);          // MediaPipe, ideally in a worker
+ *       const raw = await Promise.all(frames.map(runModel));   // ONNX Runtime
+ *       return mergeFrameBoxes(raw);                           // Web / TFLite
  *     },
  *   };
  *
- * then add it to DETECTORS below and offer it in Settings. `detect` receives the
- * actual captured JPEG frames and returns one `{ id, qty, cf }` per product;
- * anything under LOW_CONFIDENCE already renders as "needs a check" on the review
- * screen, and the hiker can still correct every number. No screen component has
- * to change.
+ * then add it to DETECTORS below and offer it in Settings. Anything under
+ * LOW_CONFIDENCE renders as "needs a check" on the review screen, and the hiker
+ * can still correct every number. No screen component has to change.
  */
+import { analyzeFrame, mergeFrameBoxes } from './vision';
+import { imageDataFromBlob, imageDataFromVideo, LIVE_EDGE, STILL_EDGE } from './frames';
 
 // ── Scripted demo data ──────────────────────────────────────────────────────
 
@@ -99,10 +110,51 @@ const afterRetake = [
 
 // ── Implementations ─────────────────────────────────────────────────────────
 
+/**
+ * Reads the real frames on the device — see `src/lib/vision.js` for how.
+ *
+ * `scan` is called two ways: from the camera loop with the live <video>, so the
+ * hiker sees boxes land on the packages as they frame the shot, and once per
+ * shutter press on the JPEG that was just captured. The still result is cached
+ * on the photo, so by the time the processing screen runs `detect` the counting
+ * is already done and only has to be folded together.
+ */
+export const visionDetector = {
+  id: 'auto',
+  autoCounts: true,
+  scripted: false,
+  overlay: () => [],
+
+  async scan(source, { live = false } = {}) {
+    const image = live
+      ? imageDataFromVideo(source, LIVE_EDGE)
+      : await imageDataFromBlob(source?.blob ?? source, STILL_EDGE);
+    if (!image) return [];
+    return analyzeFrame(image).boxes;
+  },
+
+  async detect({ frames = [] } = {}) {
+    const perFrame = [];
+    for (const frame of frames) {
+      if (frame.detections) {
+        perFrame.push(frame.detections);
+      } else if (frame.blob) {
+        try {
+          perFrame.push(await visionDetector.scan(frame));
+        } catch {
+          /* one unreadable still should not sink the whole count */
+        }
+      }
+    }
+    return mergeFrameBoxes(perFrame);
+  },
+};
+
 /** Real camera, human counting. No model, no guessing. */
 export const manualDetector = {
   id: 'manual',
   autoCounts: false,
+  scripted: false,
   overlay: () => [],
   async detect() {
     return [];
@@ -113,6 +165,7 @@ export const manualDetector = {
 export const scriptedDetector = {
   id: 'demo',
   autoCounts: true,
+  scripted: true,
   overlay: (mode) => (mode === 'before' ? sceneBefore : sceneAfter),
   async detect({ mode, attempt = 1 }) {
     const source = mode === 'before'
@@ -123,16 +176,23 @@ export const scriptedDetector = {
 };
 
 const DETECTORS = {
+  [visionDetector.id]: visionDetector,
   [manualDetector.id]: manualDetector,
   [scriptedDetector.id]: scriptedDetector,
 };
 
 export function getDetector(id) {
-  return DETECTORS[id] || manualDetector;
+  return DETECTORS[id] || visionDetector;
 }
 
 /** Milliseconds between two boxes appearing on the demo overlay. */
 export const SCAN_SPEED_MS = 380;
+
+/**
+ * Gap between two live viewfinder passes. Long enough that a slow phone is idle
+ * most of the time, short enough that the boxes follow the camera.
+ */
+export const LIVE_SCAN_MS = 650;
 
 /** Milliseconds each of the three processing phases takes. */
 export const PROCESS_PHASE_MS = 780;

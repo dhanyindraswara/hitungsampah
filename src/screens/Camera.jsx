@@ -1,11 +1,37 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../components/Icon';
 import { useApp } from '../state/AppContext';
 import { findProduct, productShortLabel } from '../data/catalog';
-import { tagPlacement } from '../lib/overlay';
+import { fitCover, tagPlacement } from '../lib/overlay';
+import { LIVE_SCAN_MS } from '../lib/detector';
 import { useCamera } from '../lib/useCamera';
 
 let photoSeq = 0;
+
+/**
+ * Live detections, drawn straight over the video.
+ *
+ * Hidden from assistive tech: these redraw every scan, and the count beside
+ * them is already announced by the live pill.
+ */
+function LiveBoxes({ boxes, t }) {
+  return boxes.map((box, index) => {
+    const product = findProduct(box.id);
+    return (
+      <div
+        key={`${box.id}-${index}`}
+        className="camera__find"
+        aria-hidden="true"
+        style={{ left: `${box.x}%`, top: `${box.y}%`, width: `${box.w}%`, height: `${box.h}%` }}
+      >
+        <div className="camera__tag" style={tagPlacement(box)}>
+          {productShortLabel(product, t)}
+          <span style={{ opacity: 0.62 }}>{box.cf}%</span>
+        </div>
+      </div>
+    );
+  });
+}
 
 /** The simulated scene, drawn only when the demo detector is active. */
 function DemoScene({ boxes, revealed }) {
@@ -94,11 +120,19 @@ function CameraNotice({ title, body, actionLabel, onAction }) {
 export default function Camera() {
   const { state, t, actions, detector } = useApp();
   const { mode, attempt, revealed, photos } = state;
-  const demo = detector.autoCounts;
+  // Scripted playback, not "counts by itself" — the on-device detector also
+  // counts by itself, but it needs the real viewfinder to do it.
+  const demo = detector.scripted;
 
   const [grid, setGrid] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
   const { videoRef, status, capture, torchAvailable, torchOn, toggleTorch } = useCamera(!demo, retryNonce);
+
+  const viewfinderRef = useRef(null);
+  const [liveBoxes, setLiveBoxes] = useState([]);
+  const [reading, setReading] = useState(false);
+  // Only the on-device detector looks at real pixels; manual counting does not.
+  const canScan = !demo && typeof detector.scan === 'function';
 
   const scene = useMemo(() => {
     if (!demo) return [];
@@ -130,8 +164,49 @@ export default function Camera() {
   }, [demo, detector, mode, attempt]);
 
   const live = status === 'live';
-  const canShoot = demo || live;
+  const canShoot = (demo || live) && !reading;
   const canFinish = demo || photos.length > 0;
+
+  // Live pass: read the viewfinder on a slow loop so packages get a box as the
+  // hiker frames them, before any photo is taken. One tick at a time — a phone
+  // that reads slower than the interval simply scans less often.
+  useEffect(() => {
+    if (!canScan || !live) {
+      setLiveBoxes([]);
+      return undefined;
+    }
+
+    let stopped = false;
+    let timer = 0;
+
+    const tick = async () => {
+      const video = videoRef.current;
+      const frame = viewfinderRef.current;
+      if (video && frame) {
+        try {
+          const boxes = await detector.scan(video, { live: true });
+          if (!stopped) {
+            setLiveBoxes(
+              fitCover(
+                boxes,
+                { w: video.videoWidth, h: video.videoHeight },
+                { w: frame.clientWidth, h: frame.clientHeight },
+              ),
+            );
+          }
+        } catch {
+          /* a single unreadable frame should not stop the loop */
+        }
+      }
+      if (!stopped) timer = setTimeout(tick, LIVE_SCAN_MS);
+    };
+
+    timer = setTimeout(tick, 250);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [canScan, live, detector, videoRef]);
 
   const onShutter = async () => {
     if (demo) {
@@ -139,11 +214,42 @@ export default function Camera() {
       actions.capture({ id: `demo-${(photoSeq += 1)}`, url: null, w: 0, h: 0 });
       return;
     }
+
     const shot = await capture();
-    if (shot) actions.capture({ id: `p-${(photoSeq += 1)}`, ...shot });
+    if (!shot) return;
+
+    const id = `p-${(photoSeq += 1)}`;
+    actions.capture({ id, ...shot });
+    if (!canScan) return;
+
+    // Read the still at full detail right away, so the count is ready before
+    // the hiker reaches the review screen and they can see, shot by shot,
+    // whether anything was picked up.
+    setReading(true);
+    try {
+      const boxes = await detector.scan(shot, { live: false });
+      actions.attachDetections(id, boxes);
+    } catch {
+      actions.attachDetections(id, []);
+    } finally {
+      setReading(false);
+    }
   };
 
   const last = photos[photos.length - 1];
+  const lastCount = last?.detections?.length ?? null;
+
+  // What the strip under the shutter says: progress while a still is being
+  // read, then the result of the last one, then the standing instruction.
+  const footer = (() => {
+    if (reading) return t.camReading;
+    if (canScan && lastCount !== null) {
+      return lastCount
+        ? t.camShotFound.replace('{n}', String(lastCount))
+        : t.camShotEmpty;
+    }
+    return canFinish ? t.camFooter : t.camNeedPhoto;
+  })();
 
   return (
     <div className="camera">
@@ -199,7 +305,7 @@ export default function Camera() {
         <span>{mode === 'before' ? t.camBeforeHint : t.camAfterHint}</span>
       </div>
 
-      <div className="camera__viewfinder">
+      <div className="camera__viewfinder" ref={viewfinderRef}>
         {!demo ? (
           <video
             ref={videoRef}
@@ -226,6 +332,13 @@ export default function Camera() {
               boxes={scene.map((box) => ({ ...box, confidence: confidences[box.id] ?? 70 }))}
               revealed={revealed}
             />
+            <div className="camera__sweep" />
+          </>
+        ) : null}
+
+        {canScan && live ? (
+          <>
+            <LiveBoxes boxes={liveBoxes} t={t} />
             <div className="camera__sweep" />
           </>
         ) : null}
@@ -264,7 +377,13 @@ export default function Camera() {
             className="camera__live-dot"
             style={{ background: demo || live ? 'var(--lime)' : '#C2C8C2' }}
           />
-          {demo ? `${Math.min(revealed, scene.length)} ${t.found}` : t[`camStatus_${status}`] || t.camStatus_idle}
+          {demo
+            ? `${Math.min(revealed, scene.length)} ${t.found}`
+            : reading
+              ? t.camReading
+              : canScan && live
+                ? `${liveBoxes.length} ${t.found}`
+                : t[`camStatus_${status}`] || t.camStatus_idle}
         </div>
 
         {photos.length > 0 ? (
@@ -325,8 +444,11 @@ export default function Camera() {
             <Icon name="check" size={24} stroke="#173D26" strokeWidth={2.6} />
           </button>
         </div>
-        <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,.55)' }}>
-          {canFinish ? t.camFooter : t.camNeedPhoto}
+        <div
+          style={{ marginTop: 12, textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,.55)' }}
+          aria-live="polite"
+        >
+          {footer}
         </div>
       </div>
     </div>

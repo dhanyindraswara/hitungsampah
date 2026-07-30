@@ -54,7 +54,8 @@ src/
   screens/     satu komponen per layar
   components/  ikon dan bottom tab bar
   state/       AppContext — seluruh alur dalam satu reducer
-  lib/         detector, perbandingan, storage, QR, helper trip
+  lib/         detector + vision (deteksi on-device), perbandingan, storage,
+               QR, helper trip
   data/        teks (ID/EN), katalog produk, data awal
   styles/      base.css (token, font, keyframes) + app.css (komponen)
 design/        prototipe asli dari Claude Design, sebagai acuan visual
@@ -72,26 +73,55 @@ tidak memberi kamera, layarnya menjelaskan kenapa dan menyediakan tombol coba
 lagi. `getUserMedia` butuh **https:// atau localhost** — di http biasa browser
 tidak akan memberikan kamera sama sekali.
 
-**Hitungnya manual, dan itu disengaja.** Aplikasi tidak menebak. Pendaki
-menambahkan tiap bungkus lewat katalog, jumlahnya bisa dinaik-turunkan, dan
-aplikasi yang mengerjakan bagian yang memang mesin lebih jago: membandingkan
-sebelum vs sesudah, per produk, lalu menghitung persentase kembali.
+**Deteksi otomatis, di perangkat.** Begitu kamu memfoto, bungkusnya langsung
+dihitung — tidak ada model yang diunduh, tidak ada foto yang dikirim ke server.
+Saat kamera terbuka, kotak deteksi sudah menempel di tiap bungkus di viewfinder;
+tiap kali shutter ditekan, fotonya dibaca lagi dengan detail penuh dan hasilnya
+menempel di foto itu, jadi layar hasil terbuka dengan daftar yang sudah terisi.
+
+Cara kerjanya (`src/lib/vision.js`) memanfaatkan instruksi yang memang sudah ada
+di layar kamera — *letakkan di permukaan datar, jangan menumpuk*:
+
+1. warna alas ditaksir dari pinggir frame, sekalian seberapa ramai alasnya;
+2. tiap piksel yang cukup jauh dari warna itu (CIE Lab) jadi objek — ditambah
+   tepian hasil Sobel, supaya bungkus putih di atas batu pucat tetap kebaca;
+3. mask dirapikan: tutup celah, isi bagian dalam yang dikelilingi tepian, buang
+   bintik;
+4. tiap region yang menyambung dihitung satu bungkus;
+5. namanya ditebak dari warna kemasan — setelah dikoreksi terhadap cahaya yang
+   jatuh di sudut frame itu, jadi bayangan tidak mengubah tebakan.
+
+Dua batasnya jelas dan disengaja. **Warna bukan bukti merek**: tebakan yang
+jauh tidak dipaksakan, dia jatuh ke kategori "tidak dikenal" dengan keyakinan di
+bawah 70 dan tampil sebagai "perlu dicek". **Bungkus yang menempel dihitung
+satu**, bukan ditebak jadi tiga — angka yang mengembang lebih berbahaya di
+gerbang daripada angka yang kurang, dan yang kurang bisa ditambah pendaki
+sebelum disimpan. Setiap angka tetap bisa dikoreksi.
+
+Kalau alasnya ramai atau sampahnya menggunung, matikan di **Pengaturan →
+Deteksi otomatis** dan hitung manual lewat katalog. Alur lainnya sama persis.
 
 **Mode demo.** Pengaturan → Mode demo mengganti detector ke skenario dari desain
 (overlay kotak deteksi, 39 bungkus, 85% lalu 100% setelah foto ulang). Berguna
 untuk presentasi tanpa perlu menata sampah sungguhan.
 
-### Menyambungkan model AI nanti
+### Mengganti dengan model terlatih nanti
 
-Semua deteksi lewat satu interface di `src/lib/detector.js`:
+Semua deteksi lewat satu interface di `src/lib/detector.js`, dan detector bawaan
+(`visionDetector`) memakai interface yang sama seperti model mana pun nanti:
 
 ```js
 {
   id: 'model',
   autoCounts: true,
-  overlay: (mode) => [],              // kotak untuk overlay kamera, boleh kosong
+  overlay: (mode) => [],              // kotak skenario, boleh kosong
+  async scan(source, { live }) {
+    // live: elemen <video> yang sedang jalan; selain itu { blob } hasil jepretan
+    return [{ id: 'indomie', cf: 97, x: .1, y: .2, w: .2, h: .1 }];  // 0–1
+  },
   async detect({ mode, attempt, frames }) {
-    // frames = JPEG hasil jepretan: { id, blob, url, w, h }
+    // frames = { id, blob, url, w, h, detections? } — detections sudah diisi
+    // scan() saat shutter ditekan, jadi di sini tinggal digabung
     return [{ id: 'indomie', qty: 4, cf: 97 }];   // cf = keyakinan 0–100
   },
 }
@@ -99,13 +129,15 @@ Semua deteksi lewat satu interface di `src/lib/detector.js`:
 
 Tambahkan objek itu ke `DETECTORS`, tawarkan di Pengaturan, selesai — tidak ada
 komponen layar yang perlu diubah. Hasil di bawah `LOW_CONFIDENCE` (70) otomatis
-tampil sebagai "perlu dicek", dan pendaki tetap bisa mengoreksi tiap angka
-sebelum disimpan. Rekomendasi: jalankan modelnya di dalam Web Worker
-(ONNX Runtime Web / TFLite / MediaPipe) supaya UI tidak tersendat.
+tampil sebagai "perlu dicek". Rekomendasi: jalankan modelnya di dalam Web Worker
+(ONNX Runtime Web / TFLite / MediaPipe) supaya UI tidak tersendat — pipeline
+bawaan cukup ringan untuk jalan di main thread (~6 ms per frame live 224px,
+~14 ms per foto 320px), model beneran biasanya tidak.
 
 Catatan jujur: model umum (COCO dan sejenisnya) cuma kenal kategori seperti
 botol dan gelas, bukan merek. Untuk mengenali Indomie atau Kopiko perlu dataset
-dan model latihan sendiri.
+dan model latihan sendiri — dan itulah yang akan menaikkan akurasi nama produk
+di atas tebakan warna yang dipakai sekarang.
 
 **Penyimpanan** lokal via IndexedDB (`src/lib/storage.js`): riwayat pendakian,
 pengaturan, dan foto sebelum/sesudah. Tidak ada akun, tidak ada server, foto
